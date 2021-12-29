@@ -1,15 +1,13 @@
-# Secp256k1::Zkp
+# Secp256k1zkp
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/secp256k1/zkp`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+WIP
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'secp256k1zkp'
+gem 'secp256k1-zkp'
 ```
 
 And then execute:

@@ -3,7 +3,7 @@
 require_relative "lib/secp256k1zkp/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "secp256k1zkp"
+  spec.name          = "secp256k1-zkp"
   spec.version       = Secp256k1zkp::VERSION
   spec.authors       = ["azuchi"]
   spec.email         = ["azuchi@chaintope.com"]
