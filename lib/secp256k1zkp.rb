@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'ffi'
+require 'secp256k1zkp/version'
 require 'secp256k1zkp/c'
 require 'secp256k1zkp/context'
 require 'secp256k1zkp/key'
