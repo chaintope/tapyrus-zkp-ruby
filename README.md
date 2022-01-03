@@ -18,6 +18,22 @@ Or install it yourself as:
 
     $ gem install secp256k1-zkp
 
+### Build secp256k1-zkp
+
+`secp256k1-zkp` requires MW's [secp256k1-zkp](https://github.com/mimblewimble/secp256k1-zkp).
+
+    $ git submodule update --init --recursive
+    $ cd depends/secp256k1-zkp
+    $ ./autogen.sh
+    $ ./configure --enable-module-ecdh --enable-module-generator --enable-module-recovery --enable-experimental  --enable-module-commitment  --enable-module-rangeproof --enable-module-bulletproof --enable-module-schnorrsig --enable-module-aggsig --disable-benchmark
+    $ make -j"$(($(nproc)+1))" 
+
+As a result, the `libsecp256k1.so` library will be generated under the `.libs` folder.
+
+### Set environment variable
+
+You need to set the path of `libsecp256k1.so` to the environment variable `LIBSECP256K1-ZKP`.
+
 ## Usage
 
 TODO: Write usage instructions here
