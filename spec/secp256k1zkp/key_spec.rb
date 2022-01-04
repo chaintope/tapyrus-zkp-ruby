@@ -47,4 +47,11 @@ RSpec.describe 'Key' do
     end
   end
 
+  describe 'PrivateKey#public_key' do
+    it 'should return PublicKey' do
+      private_key = Secp256k1zkp::PrivateKey.from_hex(ctx, '206f3acb5b7ac66dacf87910bb0b04bed78284b9b50c0d061705a44447a947ff')
+      expect(private_key.public_key(ctx).to_hex(ctx)).to eq('020025aeb645b64b632c91d135683e227cb508ebb1766c65ee40405f53b8f1bb3a')
+    end
+  end
+
 end

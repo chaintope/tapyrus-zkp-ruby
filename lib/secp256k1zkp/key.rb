@@ -80,6 +80,18 @@ module Secp256k1zkp
       raw_priv = [privkey_hex].pack('H*')
       PrivateKey.new(ctx, raw_priv)
     end
+
+    # Calculate public key
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @return [Secp256k1zkp::PublicKey]
+    def public_key(ctx)
+      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
+      public_key = PublicKey.new
+      res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, priv_ptr)
+      raise Error unless res == 1
+
+      public_key
+    end
   end
 
 end
