@@ -23,6 +23,20 @@ module Secp256k1zkp
       pubkey
     end
 
+    # Generate public key from private key.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] private_key_hex Private key hex string.
+    # @return [Secp256k1zkp::PublicKey] Public key object.
+    def self.from_private_key(ctx, private_key_hex)
+      raw_priv_key = [private_key_hex].pack('H*')
+      priv = FFI::MemoryPointer.new(:uchar, raw_priv_key.bytesize).put_bytes(0, raw_priv_key)
+      pubkey = PublicKey.new
+      res = C.secp256k1_ec_pubkey_create(ctx, pubkey.pointer, priv)
+      raise Error, 'failed to generate public key' unless res == 1
+
+      pubkey
+    end
+
     # Generate public key hex string.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Boolean] compressed whether compressed public key or not.
@@ -36,6 +50,35 @@ module Secp256k1zkp
       raise Error, 'Pubkey serialization failed' unless res == 1
 
       output.read_bytes(len_compressed).unpack1('H*')
+    end
+  end
+
+  class PrivateKey
+
+    SIZE = 32
+
+    attr_reader :key
+
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] key private key with binary format.
+    # @return [Secp256k1zkp::PrivateKey]
+    def initialize(ctx, key)
+      raise InvalidPrivateKey, 'Invalid private key size' unless key.bytesize == SIZE
+
+      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
+      res = C.secp256k1_ec_seckey_verify(ctx.ctx, priv_ptr)
+      raise InvalidPrivateKey unless res == 1
+
+      @key = key
+    end
+
+    # Initialize private key from hex data.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] key private key with hex format.
+    # @return [Secp256k1zkp::PrivateKey]
+    def self.from_hex(ctx, privkey_hex)
+      raw_priv = [privkey_hex].pack('H*')
+      PrivateKey.new(ctx, raw_priv)
     end
   end
 

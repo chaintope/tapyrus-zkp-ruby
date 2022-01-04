@@ -12,6 +12,7 @@ module Secp256k1zkp
 
   class Error < StandardError; end
   class InvalidPublicKey < Error; end
+  class InvalidPrivateKey < Error; end
 
   class AggSigContext < FFI::Struct
     layout :data, :int

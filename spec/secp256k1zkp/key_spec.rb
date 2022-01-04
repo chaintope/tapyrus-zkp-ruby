@@ -6,7 +6,7 @@ RSpec.describe 'Key' do
 
   let(:ctx) { Secp256k1zkp::Context.new }
 
-  describe 'Pubkey#from_hex' do
+  describe 'PublicKey#from_hex' do
     context 'Invalid public key' do
       it 'raise InvalidPublicKey error' do
         expect { Secp256k1zkp::PublicKey.from_hex(ctx, nil) }.to raise_error(Secp256k1zkp::InvalidPublicKey)
@@ -22,6 +22,27 @@ RSpec.describe 'Key' do
         compressed = '0317b7e1ce1f9f94c32a43739229f88c0b0333296fb46e8f72865849c6ae34b84e'
         compressed_key = Secp256k1zkp::PublicKey.from_hex(ctx, compressed)
         expect(compressed_key.to_hex(ctx)).to eq(compressed)
+      end
+    end
+  end
+
+  describe 'PrivateKey#initialize' do
+    context 'Invalid private key' do
+      it 'should raise InvalidPrivateKey' do
+        expect { Secp256k1zkp::PrivateKey.from_hex(ctx, 'ff' * 32) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
+        expect { Secp256k1zkp::PrivateKey.from_hex(ctx, '00' * 32) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
+        expect { Secp256k1zkp::PrivateKey.from_hex(ctx, nil) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
+        # over max range
+        key = 'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'
+        expect { Secp256k1zkp::PrivateKey.from_hex(ctx, key) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
+      end
+    end
+
+    context 'Valid private key' do
+      it 'should generate Secp256k1zkp::PrivateKey' do
+        # max range
+        key = 'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140'
+        expect(Secp256k1zkp::PrivateKey.from_hex(ctx, key).key).to eq([key].pack('H*'))
       end
     end
   end
