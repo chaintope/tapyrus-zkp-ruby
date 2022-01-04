@@ -53,9 +53,10 @@ module Secp256k1zkp
     end
   end
 
+  # Secp256k1 private key
   class PrivateKey
 
-    SIZE = 32
+    BYTE_SIZE = 32
 
     attr_reader :key
 
@@ -63,7 +64,7 @@ module Secp256k1zkp
     # @param [String] key private key with binary format.
     # @return [Secp256k1zkp::PrivateKey]
     def initialize(ctx, key)
-      raise InvalidPrivateKey, 'Invalid private key size' unless key.bytesize == SIZE
+      raise InvalidPrivateKey, 'Invalid private key size' unless key.bytesize == BYTE_SIZE
 
       priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
       res = C.secp256k1_ec_seckey_verify(ctx.ctx, priv_ptr)
