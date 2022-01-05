@@ -32,7 +32,7 @@ module Secp256k1zkp
       priv = FFI::MemoryPointer.new(:uchar, raw_priv_key.bytesize).put_bytes(0, raw_priv_key)
       pubkey = PublicKey.new
       res = C.secp256k1_ec_pubkey_create(ctx, pubkey.pointer, priv)
-      raise Error, 'failed to generate public key' unless res == 1
+      raise AssertError, 'failed to generate public key' unless res == 1
 
       pubkey
     end
@@ -47,7 +47,7 @@ module Secp256k1zkp
       out_len = FFI::MemoryPointer.new(:size_t).write_uint(len_compressed)
       compress_flag = compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED
       res = C.secp256k1_ec_pubkey_serialize(ctx.ctx, output, out_len, self.pointer, compress_flag)
-      raise Error, 'Pubkey serialization failed' unless res == 1
+      raise AssertError, 'Pubkey serialization failed' unless res == 1
 
       output.read_bytes(len_compressed).unpack1('H*')
     end
@@ -98,9 +98,23 @@ module Secp256k1zkp
       priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
       public_key = PublicKey.new
       res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, priv_ptr)
-      raise Error unless res == 1
+      raise AssertError, 'secp256k1_ec_pubkey_create failed' unless res == 1
 
       public_key
+    end
+
+    # Generate signature.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] msg message with binary format to be signed.
+    # @return [Secp256k1zkp::ECDSA::Signature]
+    def sign(ctx, msg)
+      msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
+      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
+      signature = Secp256k1zkp::ECDSA::Signature.new
+      res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, priv_ptr, nil, nil)
+      raise AssertError, 'secp256k1_ecdsa_sign failed' unless res == 1
+
+      signature
     end
   end
 

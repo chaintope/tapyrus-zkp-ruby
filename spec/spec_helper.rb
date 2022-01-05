@@ -30,3 +30,8 @@ RSpec.configure do |config|
 
   end
 end
+
+# Convert hex to binary.
+def hex!(hex)
+  [hex].pack('H*')
+end
