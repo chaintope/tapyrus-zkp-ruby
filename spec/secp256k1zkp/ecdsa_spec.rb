@@ -19,12 +19,21 @@ RSpec.describe Secp256k1zkp::ECDSA do
 
   describe 'signature serialization round trip' do
     it 'should success' do
-      msg = SecureRandom.bytes(32)
-      private_key = Secp256k1zkp::PrivateKey.generate(ctx)
-      sig1 = private_key.sign(ctx, msg)
-      der = sig1.to_der(ctx)
-      sig2 = Secp256k1zkp::ECDSA::Signature.from_der(ctx, der)
-      expect(sig1).to eq(sig2)
+      100.times do
+        msg = SecureRandom.bytes(Secp256k1zkp::PrivateKey::BYTE_SIZE)
+        private_key = Secp256k1zkp::PrivateKey.generate(ctx)
+        sig1 = private_key.sign(ctx, msg)
+
+        # DER
+        der = sig1.to_der(ctx)
+        sig2 = Secp256k1zkp::ECDSA::Signature.from_der(ctx, der)
+        expect(sig1).to eq(sig2)
+
+        # Compact
+        compact = sig1.to_compact(ctx)
+        sig2 = Secp256k1zkp::ECDSA::Signature.from_compact(ctx, compact)
+        expect(sig1).to eq(sig2)
+      end
     end
   end
 
