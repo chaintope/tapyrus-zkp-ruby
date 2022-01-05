@@ -33,6 +33,9 @@ RSpec.describe Secp256k1zkp::ECDSA do
         compact = sig1.to_compact(ctx)
         sig2 = Secp256k1zkp::ECDSA::Signature.from_compact(ctx, compact)
         expect(sig1).to eq(sig2)
+
+        expect { Secp256k1zkp::ECDSA::Signature.from_der(ctx, compact) }.to raise_error(Secp256k1zkp::InvalidSignature)
+        expect { Secp256k1zkp::ECDSA::Signature.from_compact(ctx, der) }.to raise_error(Secp256k1zkp::InvalidSignature)
       end
     end
   end
