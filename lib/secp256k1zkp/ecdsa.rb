@@ -67,6 +67,12 @@ module Secp256k1zkp
         data.read_bytes(SIZE_COMPACT)
       end
 
+      # Normalizes a signature to a "low S" form.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      def normalize_s!(ctx)
+        C.secp256k1_ecdsa_signature_normalize(ctx.ctx, pointer, pointer)
+      end
+
       # Override +==+ to check whether same signature or not.
       # @param [Secp256k1zkp::ECDSA::Signature] other
       # @return [Boolean]

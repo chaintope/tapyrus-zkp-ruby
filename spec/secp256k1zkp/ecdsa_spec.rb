@@ -40,4 +40,20 @@ RSpec.describe Secp256k1zkp::ECDSA do
     end
   end
 
+  describe 'LOW-S signature' do
+    it do
+      sig = hex!('3046022100839c1fbc5304de944f697c9f4b1d01d1faeba32d751c0f7acb21ac8a0f436a72022100e89bd46bb3a5a62adc679f659b7ce876d83ee297c7a5587b2011c4fcc72eab45')
+      msg = hex!('a4965ca63b7d8562736ceec36dfa5a11bf426eb65be8ea3f7a49ae363032da0d')
+
+      signature = Secp256k1zkp::ECDSA::Signature.from_der(ctx, sig)
+      pubkey = Secp256k1zkp::PublicKey.from_hex(ctx, '031ee99d2b786ab3b0991325f2de8489246a6a3fdb700f6d0511b1d80cf5f4cd43')
+
+      # without normalization we expect this will fail
+      expect(pubkey.valid_sig?(ctx, msg, signature)).to be false
+      # after normalization it should pass
+      signature.normalize_s!(ctx)
+      expect(pubkey.valid_sig?(ctx, msg, signature)).to be true
+    end
+  end
+
 end

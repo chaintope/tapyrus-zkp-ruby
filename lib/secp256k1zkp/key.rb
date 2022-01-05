@@ -51,6 +51,17 @@ module Secp256k1zkp
 
       output.read_bytes(len_compressed).unpack1('H*')
     end
+
+    # Verify signature.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] msg signed message with binary format.
+    # @param [Secp256k1zkp::ECDSA::Signature] sig signature.
+    # @return [Boolean]
+    def valid_sig?(ctx, msg, sig)
+      msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
+      res = C.secp256k1_ecdsa_verify(ctx.ctx, sig.pointer, msg_ptr, pointer)
+      res == 1
+    end
   end
 
   # Secp256k1 private key
