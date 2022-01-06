@@ -7,6 +7,7 @@ require 'secp256k1zkp/c'
 require 'secp256k1zkp/context'
 require 'secp256k1zkp/key'
 require 'secp256k1zkp/ecdsa'
+require 'secp256k1zkp/ecdh'
 
 # Nimbleness's secp256k1-zkp binding.
 # https://github.com/mimblewimble/secp256k1-zkp

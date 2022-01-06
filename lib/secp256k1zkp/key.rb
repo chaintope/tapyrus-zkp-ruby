@@ -66,6 +66,14 @@ module Secp256k1zkp
       res == 1
     end
 
+    # Generate shared secret from +private_key+ and self.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Secp256k1zkp::PrivateKey] private_key
+    # @return [Secp256k1zkp::ECDH::SharedSecret]
+    def ecdh(ctx, private_key)
+      ECDH.generate(ctx, self, private_key)
+    end
+
     # Override +==+ to check whether same public key or not.
     # @param [Secp256k1zkp::PublicKey] other
     # @return [Boolean]
@@ -122,7 +130,7 @@ module Secp256k1zkp
     # @raise [Secp256k1zkp::AssertError]
     def public_key(ctx)
       public_key = PublicKey.new
-      res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, private_key_ptr)
+      res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, pointer)
       raise AssertError, 'secp256k1_ec_pubkey_create failed' unless res == 1
 
       public_key
@@ -136,7 +144,7 @@ module Secp256k1zkp
     def sign(ctx, msg)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
       signature = Secp256k1zkp::ECDSA::Signature.new
-      res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, private_key_ptr, nil, nil)
+      res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, pointer, nil, nil)
       raise AssertError, 'secp256k1_ecdsa_sign failed' unless res == 1
 
       signature
@@ -151,15 +159,21 @@ module Secp256k1zkp
     def sign_recoverable(ctx, msg)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
       signature = Secp256k1zkp::ECDSA::RecoverableSignature.new
-      res = C.secp256k1_ecdsa_sign_recoverable(ctx.ctx, signature.pointer, msg_ptr, private_key_ptr, nil, nil)
+      res = C.secp256k1_ecdsa_sign_recoverable(ctx.ctx, signature.pointer, msg_ptr, pointer, nil, nil)
       raise AssertError, 'secp256k1_ecdsa_sign_recoverable failed' unless res == 1
 
       signature
     end
 
-    private
+    # Generate shared secret from +public_key+ and self.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Secp256k1zkp::PublicKey] public_key
+    # @return [Secp256k1zkp::ECDH::SharedSecret]
+    def ecdh(ctx, public_key)
+      ECDH.generate(ctx, public_key, self)
+    end
 
-    def private_key_ptr
+    def pointer
       FFI::MemoryPointer.new(:uchar, BYTE_SIZE).put_bytes(0, key)
     end
   end

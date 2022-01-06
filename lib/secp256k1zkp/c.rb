@@ -82,5 +82,12 @@ module Secp256k1zkp
       attach_function :secp256k1_ecdsa_recover, [:pointer, :pointer, :pointer, :pointer], :int
     rescue FFI::NotFoundError
     end
+
+    # ECDH module
+    begin
+      # int secp256k1_ecdh(const secp256k1_context* ctx, unsigned char *result, const secp256k1_pubkey *point, const unsigned char *scalar)
+      attach_function :secp256k1_ecdh, [:pointer, :pointer, :pointer, :pointer], :int
+    rescue FFI::NotFoundError
+    end
   end
 end
