@@ -57,14 +57,21 @@ RSpec.describe Secp256k1zkp::ECDSA do
   end
 
   describe 'Recoverable signature' do
-    it 'should be generated' do
+    it do
       one = '0000000000000000000000000000000000000000000000000000000000000001'
       private_key = Secp256k1zkp::PrivateKey.from_hex(ctx, one)
-      sig1 = private_key.sign_recoverable(ctx, hex!(one))
+      msg = hex!(one)
+      sig1 = private_key.sign_recoverable(ctx, msg)
       compact = hex!('6673ffad2147741f04772b6f921f0ba6af0c1e77fc439e65c36dedf4092e88984c1a971652e0ada880120ef8025e709fff2080c4a39aae068d12eed009b68c89')
       sig2 = Secp256k1zkp::ECDSA::RecoverableSignature.from_compact(ctx, compact, 1)
       expect(sig1).to eq(sig2)
       expect(sig2.to_compact(ctx)).to eq([1, compact])
+
+      sig = sig1.to_standard(ctx)
+      public_key = private_key.public_key(ctx)
+      expect(public_key.valid_sig?(ctx, msg, sig)).to be true
+      msg2 = hex!('0000000000000000000000000000000000000000000000000000000000000002')
+      expect(public_key.valid_sig?(ctx, msg2, sig)).to be false
     end
   end
 end

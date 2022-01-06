@@ -84,6 +84,7 @@ module Secp256k1zkp
     end
 
     # Recoverable ECDSA signature
+    # Note: This class can only be used if the libsecp256k1-zkp recovery module is enabled.
     class RecoverableSignature < FFI::Struct
       layout :data, [:uchar, 65]
 
@@ -114,6 +115,18 @@ module Secp256k1zkp
         raise AssertError, 'secp256k1_ecdsa_recoverable_signature_serialize_compact failed' unless res == 1
 
         [rec_id_ptr.read_int, data_ptr.read_bytes(Signature::SIZE_COMPACT)]
+      end
+
+      # Convert recoverable signature to normal signature.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @return [Secp256k1zkp::ECDSA::Signature]
+      # @raise [Secp256k1zkp::AssertError]
+      def to_standard(ctx)
+        standard = Signature.new
+        res = C.secp256k1_ecdsa_recoverable_signature_convert(ctx.ctx, standard.pointer, pointer)
+        raise AssertError, 'secp256k1_ecdsa_recoverable_signature_convert failed' unless res == 1
+
+        standard
       end
 
       # Override +==+ to check whether same signature or not.
