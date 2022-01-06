@@ -129,6 +129,20 @@ module Secp256k1zkp
         standard
       end
 
+      # Determines the public key for which `sig` is a valid signature for +msg+.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [String] msg message with binary format.
+      # @return [Secp256k1zkp::PublicKey]
+      # @raise [Secp256k1zkp::InvalidSignature]
+      def recover(ctx, msg)
+        msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
+        public_key = Secp256k1zkp::PublicKey.new
+        res = C.secp256k1_ecdsa_recover(ctx.ctx, public_key.pointer, pointer, msg_ptr)
+        raise InvalidSignature unless res == 1
+
+        public_key
+      end
+
       # Override +==+ to check whether same signature or not.
       # @param [Secp256k1zkp::ECDSA::Signature] other
       # @return [Boolean]

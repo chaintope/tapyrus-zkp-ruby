@@ -72,6 +72,8 @@ RSpec.describe Secp256k1zkp::ECDSA do
       expect(public_key.valid_sig?(ctx, msg, sig)).to be true
       msg2 = hex!('0000000000000000000000000000000000000000000000000000000000000002')
       expect(public_key.valid_sig?(ctx, msg2, sig)).to be false
+
+      expect(sig1.recover(ctx, msg)).to eq(public_key)
     end
   end
 end

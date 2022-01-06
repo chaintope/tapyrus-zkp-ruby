@@ -65,6 +65,15 @@ module Secp256k1zkp
       res = C.secp256k1_ecdsa_verify(ctx.ctx, sig.pointer, msg_ptr, pointer)
       res == 1
     end
+
+    # Override +==+ to check whether same public key or not.
+    # @param [Secp256k1zkp::PublicKey] other
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(PublicKey)
+
+      self[:data].to_a == other[:data].to_a
+    end
   end
 
   # Secp256k1 private key
