@@ -10,6 +10,7 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] pubkey_hex Public key hex string.
     # @return [Secp256k1zkp::PublicKey] Public key object.
+    # @raise [Secp256k1zkp::InvalidPublicKey]
     def self.from_hex(ctx, pubkey_hex)
       raw_pubkey = [pubkey_hex].pack('H*')
       raise InvalidPublicKey, 'Invalid public key size.' unless [33, 65].include?(raw_pubkey.bytesize)
@@ -27,6 +28,7 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] private_key_hex Private key hex string.
     # @return [Secp256k1zkp::PublicKey] Public key object.
+    # @raise [Secp256k1zkp::AssertError]
     def self.from_private_key(ctx, private_key_hex)
       raw_priv_key = [private_key_hex].pack('H*')
       priv = FFI::MemoryPointer.new(:uchar, raw_priv_key.bytesize).put_bytes(0, raw_priv_key)
@@ -41,6 +43,7 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Boolean] compressed whether compressed public key or not.
     # @return [String] Public key hex string.
+    # @raise [Secp256k1zkp::AssertError]
     def to_hex(ctx, compressed: true)
       len_compressed = compressed ? 33 : 65
       output = FFI::MemoryPointer.new(:uchar, len_compressed)
@@ -74,10 +77,11 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] key private key with binary format.
     # @return [Secp256k1zkp::PrivateKey]
+    # @raise [Secp256k1zkp::InvalidPrivateKey]
     def initialize(ctx, key)
       raise InvalidPrivateKey, 'Invalid private key size' unless key.bytesize == BYTE_SIZE
 
-      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
+      priv_ptr = FFI::MemoryPointer.new(:uchar, BYTE_SIZE).put_bytes(0, key)
       res = C.secp256k1_ec_seckey_verify(ctx.ctx, priv_ptr)
       raise InvalidPrivateKey unless res == 1
 
@@ -87,6 +91,7 @@ module Secp256k1zkp
     # Generate private key.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @return [Secp256k1zkp::PrivateKey]
+    # @raise [Secp256k1zkp::InvalidPrivateKey]
     def self.generate(ctx)
       from_hex(ctx, SecureRandom.hex(BYTE_SIZE))
     rescue InvalidPrivateKey
@@ -105,10 +110,10 @@ module Secp256k1zkp
     # Calculate public key
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @return [Secp256k1zkp::PublicKey]
+    # @raise [Secp256k1zkp::AssertError]
     def public_key(ctx)
-      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
       public_key = PublicKey.new
-      res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, priv_ptr)
+      res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, private_key_ptr)
       raise AssertError, 'secp256k1_ec_pubkey_create failed' unless res == 1
 
       public_key
@@ -118,14 +123,35 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] msg message with binary format to be signed.
     # @return [Secp256k1zkp::ECDSA::Signature]
+    # @raise [Secp256k1zkp::AssertError]
     def sign(ctx, msg)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
-      priv_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, key)
       signature = Secp256k1zkp::ECDSA::Signature.new
-      res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, priv_ptr, nil, nil)
+      res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, private_key_ptr, nil, nil)
       raise AssertError, 'secp256k1_ecdsa_sign failed' unless res == 1
 
       signature
+    end
+
+    # Generate recoverable signature.
+    # Note: This method can only be used if the libsecp256k1-zkp recovery module is enabled.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [String] msg message with binary format to be signed.
+    # @return [Secp256k1zkp::ECDSA::RecoverableSignature]
+    # @raise [Secp256k1zkp::AssertError]
+    def sign_recoverable(ctx, msg)
+      msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
+      signature = Secp256k1zkp::ECDSA::RecoverableSignature.new
+      res = C.secp256k1_ecdsa_sign_recoverable(ctx.ctx, signature.pointer, msg_ptr, private_key_ptr, nil, nil)
+      raise AssertError, 'secp256k1_ecdsa_sign_recoverable failed' unless res == 1
+
+      signature
+    end
+
+    private
+
+    def private_key_ptr
+      FFI::MemoryPointer.new(:uchar, BYTE_SIZE).put_bytes(0, key)
     end
   end
 

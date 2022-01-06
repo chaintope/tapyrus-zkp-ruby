@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Secp256k1zkp
   # Secp256k1 context class.
   class Context

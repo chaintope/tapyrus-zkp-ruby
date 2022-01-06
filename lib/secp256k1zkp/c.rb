@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'securerandom'
-
 module Secp256k1zkp
 
   # All flags' lower 8 bits indicate what they're for. Do not use directly.
@@ -69,5 +67,20 @@ module Secp256k1zkp
     attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int
     # int secp256k1_ecdsa_verify(const secp256k1_context *ctx, const secp256k1_ecdsa_signature *sig, const unsigned char *msg32, const secp256k1_pubkey *pubkey)
     attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :pointer, :pointer], :int
+
+    # Recovery module
+    begin
+      # int secp256k1_ecdsa_recoverable_signature_parse_compact(const secp256k1_context *ctx, secp256k1_ecdsa_recoverable_signature *sig, const unsigned char *input64, int recid)
+      attach_function :secp256k1_ecdsa_recoverable_signature_parse_compact, [:pointer, :pointer, :pointer, :int], :int
+      # int secp256k1_ecdsa_recoverable_signature_convert(const secp256k1_context *ctx, secp256k1_ecdsa_signature *sig, const secp256k1_ecdsa_recoverable_signature *sigin)
+      attach_function :secp256k1_ecdsa_recoverable_signature_convert, [:pointer, :pointer, :pointer], :int
+      # int secp256k1_ecdsa_recoverable_signature_serialize_compact(const secp256k1_context *ctx, unsigned char *output64, int *recid, const secp256k1_ecdsa_recoverable_signature *sig)
+      attach_function :secp256k1_ecdsa_recoverable_signature_serialize_compact, [:pointer, :pointer, :pointer, :pointer], :int
+      # int secp256k1_ecdsa_sign_recoverable(const secp256k1_context* ctx, secp256k1_ecdsa_recoverable_signature *sig, const unsigned char *msg32, const unsigned char *seckey, secp256k1_nonce_function noncefp, const void *ndata)
+      attach_function :secp256k1_ecdsa_sign_recoverable, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int
+      # int secp256k1_ecdsa_recover(const secp256k1_context* ctx, secp256k1_pubkey* pubkey, secp256k1_ecdsa_recoverable_signature *sig, const unsigned char *msg32)
+      attach_function :secp256k1_ecdsa_recover, [:pointer, :pointer, :pointer, :pointer], :int
+    rescue FFI::NotFoundError
+    end
   end
 end

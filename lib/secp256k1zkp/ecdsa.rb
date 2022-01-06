@@ -83,8 +83,34 @@ module Secp256k1zkp
       end
     end
 
+    # Recoverable ECDSA signature
     class RecoverableSignature < FFI::Struct
       layout :data, [:uchar, 65]
+
+      # Convert a compact-encoded byte slice to a signature.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [String] compact signature with binary format.
+      # @param [Integer] rec_id recovery id.
+      # @return [Secp256k1zkp::ECDSA::RecoverableSignature]
+      def self.from_compact(ctx, compact, rec_id)
+        raise InvalidSignature unless compact.bytesize == Signature::SIZE_COMPACT
+
+        data_ptr = FFI::MemoryPointer.new(:uchar, compact.bytesize).put_bytes(0, compact)
+        signature = Secp256k1zkp::ECDSA::RecoverableSignature.new
+        res = C.secp256k1_ecdsa_recoverable_signature_parse_compact(ctx.ctx, signature.pointer, data_ptr, rec_id)
+        raise InvalidSignature unless res == 1
+
+        signature
+      end
+
+      # Override +==+ to check whether same signature or not.
+      # @param [Secp256k1zkp::ECDSA::Signature] other
+      # @return [Boolean]
+      def ==(other)
+        return false unless other.is_a?(RecoverableSignature)
+
+        self[:data].to_a == other[:data].to_a
+      end
     end
   end
 end
