@@ -60,11 +60,11 @@ module Secp256k1zkp
       # @raise [Secp256k1zkp::AssertError]
       # @return [String] Compact signature
       def to_compact(ctx)
-        data = FFI::MemoryPointer.new(:uchar, SIZE_COMPACT)
-        res = C.secp256k1_ecdsa_signature_serialize_compact(ctx.ctx, data, pointer)
+        data_ptr = FFI::MemoryPointer.new(:uchar, SIZE_COMPACT)
+        res = C.secp256k1_ecdsa_signature_serialize_compact(ctx.ctx, data_ptr, pointer)
         raise AssertError, 'secp256k1_ecdsa_signature_serialize_compact failed' unless res == 1
 
-        data.read_bytes(SIZE_COMPACT)
+        data_ptr.read_bytes(SIZE_COMPACT)
       end
 
       # Normalizes a signature to a "low S" form.
@@ -101,6 +101,19 @@ module Secp256k1zkp
         raise InvalidSignature unless res == 1
 
         signature
+      end
+
+      # Convert the recoverable signature in compact format
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @return [Array(rec_id, compact)]
+      # @raise [Secp256k1zkp::AssertError]
+      def to_compact(ctx)
+        data_ptr = FFI::MemoryPointer.new(:uchar, Signature::SIZE_COMPACT)
+        rec_id_ptr = FFI::MemoryPointer.new(:int)
+        res = C.secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx.ctx, data_ptr, rec_id_ptr, pointer)
+        raise AssertError, 'secp256k1_ecdsa_recoverable_signature_serialize_compact failed' unless res == 1
+
+        [rec_id_ptr.read_int, data_ptr.read_bytes(Signature::SIZE_COMPACT)]
       end
 
       # Override +==+ to check whether same signature or not.
