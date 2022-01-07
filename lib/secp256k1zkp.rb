@@ -21,4 +21,6 @@ module Secp256k1zkp
   class InvalidSignature < Error; end
   class PartialSigFailure < Error; end
 
+  ZERO_256 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].freeze
+
 end

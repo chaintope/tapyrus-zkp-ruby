@@ -27,4 +27,29 @@ RSpec.describe Secp256k1zkp::AggSig do
     end
   end
 
+  describe 'Aggsig single' do
+    it do
+      private_key = Secp256k1zkp::PrivateKey.generate(ctx)
+      public_key = private_key.public_key(ctx)
+      msg = SecureRandom.bytes(32)
+
+      # Signature verification single (correct)
+      sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key)
+      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
+      expect(result).to be true
+
+      # Signature verification single (wrong message)
+      msg = SecureRandom.bytes(32)
+      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
+      expect(result).to be false
+
+      # test optional extra key
+      msg = SecureRandom.bytes(32)
+      private_key_extra = Secp256k1zkp::PrivateKey.generate(ctx)
+      public_key_extra = private_key_extra.public_key(ctx)
+      sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key, extra: private_key_extra)
+      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, extra_pubkey: public_key_extra)
+      expect(result).to be true
+    end
+  end
 end
