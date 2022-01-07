@@ -89,5 +89,28 @@ module Secp256k1zkp
       attach_function :secp256k1_ecdh, [:pointer, :pointer, :pointer, :pointer], :int
     rescue FFI::NotFoundError
     end
+
+    # AGGSIG (Schnorr) Multisig
+    begin
+      # secp256k1_aggsig_context* secp256k1_aggsig_context_create(const secp256k1_context *ctx, const secp256k1_pubkey *pubkeys, size_t n_pubkeys, const unsigned char *seed)
+      attach_function :secp256k1_aggsig_context_create, [:pointer, :pointer, :size_t, :pointer], :pointer
+      # void secp256k1_aggsig_context_destroy(secp256k1_aggsig_context *aggctx)
+      attach_function :secp256k1_aggsig_context_destroy, [:pointer], :void
+      # int secp256k1_aggsig_generate_nonce(const secp256k1_context* ctx, secp256k1_aggsig_context* aggctx, size_t index)
+      attach_function :secp256k1_aggsig_generate_nonce, [:pointer, :pointer, :size_t], :int
+      # int secp256k1_aggsig_partial_sign(const secp256k1_context* ctx, secp256k1_aggsig_context* aggctx, secp256k1_aggsig_partial_signature *partial, const unsigned char *msghash32, const unsigned char *seckey32, size_t index)
+      attach_function :secp256k1_aggsig_partial_sign, [:pointer, :pointer, :pointer, :pointer, :pointer, :size_t], :int
+      # int secp256k1_aggsig_combine_signatures(const secp256k1_context* ctx, secp256k1_aggsig_context* aggctx, unsigned char *sig64, const secp256k1_aggsig_partial_signature *partial, size_t n_sigs)
+      attach_function :secp256k1_aggsig_combine_signatures, [:pointer, :pointer, :pointer, :pointer, :size_t], :int
+      # int secp256k1_aggsig_build_scratch_and_verify(const secp256k1_context* ctx, const unsigned char *sig64, const unsigned char *msg32, const secp256k1_pubkey *pubkeys, size_t n_pubkeys)
+      attach_function :secp256k1_aggsig_build_scratch_and_verify, [:pointer, :pointer, :pointer, :pointer, :size_t], :int
+      # int secp256k1_aggsig_export_secnonce_single(const secp256k1_context* ctx, unsigned char* secnonce32, const unsigned char* seed)
+      attach_function :secp256k1_aggsig_export_secnonce_single, [:pointer, :pointer, :pointer], :int
+      # int secp256k1_aggsig_sign_single(const secp256k1_context* ctx, unsigned char *sig64, const unsigned char *msg32, const unsigned char *seckey32, const unsigned char* secnonce32, const unsigned char* extra32, const secp256k1_pubkey* pubnonce_for_e, const secp256k1_pubkey* pubnonce_total, const secp256k1_pubkey* pubkey_for_e, const unsigned char* seed)
+      attach_function :secp256k1_aggsig_sign_single, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int
+      # int secp256k1_aggsig_verify_single(const secp256k1_context* ctx, const unsigned char *sig64, const unsigned char *msg32, const secp256k1_pubkey *pubnonce, const secp256k1_pubkey *pubkey, const secp256k1_pubkey *pubkey_total, const secp256k1_pubkey *extra_pubkey, const int is_partial)
+      attach_function :secp256k1_aggsig_verify_single, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :int], :int
+    rescue FFI::NotFoundError
+    end
   end
 end
