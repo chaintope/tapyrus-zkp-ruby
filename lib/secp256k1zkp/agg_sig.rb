@@ -89,18 +89,18 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] msg message to be signed.
     # @param [Secp256k1zkp::PrivateKey] private_key private key.
-    # @param [Secp256k1zkp::PrivateKey] priv_nonce private nonce. if nil, generate a nonce.
+    # @param [Secp256k1zkp::PrivateKey] secnonce private nonce. if nil, generate a nonce.
     # @param [Secp256k1zkp::PrivateKey] extra If not nil, add this key to s.
-    # @param [Secp256k1zkp::PublicKey] pub_nonce If not nil, overrides the public nonce to encode as part of e.
+    # @param [Secp256k1zkp::PublicKey] pubnonce If not nil, overrides the public nonce to encode as part of e.
     # @param [Secp256k1zkp::PublicKey] publick_key_for_e If not nil, encode this value in e instead of the derived
     # @param [Secp256k1zkp::PublicKey] final_nonce_sum If not nil, overrides the public nonce to encode as part of e
     # @return [Secp256k1zkp::ECDSA::Signature]
-    def sign_single(ctx, msg, private_key, priv_nonce: nil, extra: nil, pub_nonce: nil, publick_key_for_e: nil, final_nonce_sum: nil)
+    def sign_single(ctx, msg, private_key, secnonce: nil, extra: nil, pubnonce: nil, publick_key_for_e: nil, final_nonce_sum: nil)
       sig = Secp256k1zkp::ECDSA::Signature.new
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
       seed = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, SecureRandom.bytes(32))
-      priv_nonce_ptr = priv_nonce&.pointer
-      pub_nonce_ptr = pub_nonce&.pointer
+      priv_nonce_ptr = secnonce&.pointer
+      pub_nonce_ptr = pubnonce&.pointer
       extra_ptr = extra&.pointer
       publick_key_for_e_ptr = publick_key_for_e&.pointer
       final_nonce_sum_ptr = final_nonce_sum&.pointer
@@ -117,13 +117,13 @@ module Secp256k1zkp
     # @param [String] msg message to be verified.
     # @param [Secp256k1zkp::PublicKey] public_key public key.
     # @param [Boolean] partial whether this is a partial sig, or a fully-combined sig.
-    # @param [Secp256k1zkp::PublicKey] pub_nonce If not nil, overrides the public nonce used to calculate e.
+    # @param [Secp256k1zkp::PublicKey] pubnonce If not nil, overrides the public nonce used to calculate e.
     # @param [Secp256k1zkp::PublicKey] pubkey_total If not nil, encode this value in e.
     # @param [Secp256k1zkp::PublicKey] extra_pubkey If not nil, subtract this pubkey from sG.
     # @return [Boolean]
-    def valid_single?(ctx, sig, msg, public_key, partial, pub_nonce: nil, pubkey_total: nil, extra_pubkey: nil)
+    def valid_single?(ctx, sig, msg, public_key, partial, pubnonce: nil, pubkey_total: nil, extra_pubkey: nil)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
-      pub_nonce_ptr = pub_nonce&.pointer
+      pub_nonce_ptr = pubnonce&.pointer
       extra_pubkey_ptr = extra_pubkey&.pointer
       pubkey_total_ptr = pubkey_total&.pointer
       is_partial = partial ? 1 : 0
