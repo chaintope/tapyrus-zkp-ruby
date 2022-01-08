@@ -133,5 +133,36 @@ module Secp256k1zkp
                                              pubkey_total_ptr, extra_pubkey_ptr, is_partial)
       res == 1
     end
+
+    # Generates and exports a secure nonce, of which the public part can be shared and fed back for a later signature.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @return [Secp256k1zkp::PrivateKey]
+    # @raise [Secp256k1zkp::AssertError]
+    def export_secnonce_single(ctx)
+      secnonce = FFI::MemoryPointer.new(:uchar, 32)
+      seed = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, SecureRandom.bytes(32))
+      res = C.secp256k1_aggsig_export_secnonce_single(ctx.ctx, secnonce, seed)
+      raise AssertError, 'secp256k1_aggsig_export_secnonce_single failed' unless res == 1
+
+      Secp256k1zkp::PrivateKey.new(ctx, secnonce.read_bytes(32))
+    end
+
+    # Simple addition of two signatures + two public nonces into a single signature
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Array(Secp256k1zkp::ECDSA::Signature)] sigs sig1 and sig2 to be added.
+    # @param [Secp256k1zkp::PublicKey] pubnoce_total sum of public nonces
+    # @return [Secp256k1zkp::ECDSA::Signature]
+    # @raise [InvalidSignature]
+    def add_signatures_single(ctx, sigs, pubnoce_total)
+      sig = Secp256k1zkp::ECDSA::Signature.new
+      sigs_ptr = FFI::MemoryPointer.new(:pointer, sigs.length)
+      sigs.each_with_index do |sig, i|
+        sigs_ptr[i].put_pointer(0, sig.pointer)
+      end
+      res = C.secp256k1_aggsig_add_signatures_single(ctx.ctx, sig.pointer, sigs_ptr, sigs.length, pubnoce_total.pointer)
+      raise InvalidSignature unless res == 1
+
+      sig
+    end
   end
 end

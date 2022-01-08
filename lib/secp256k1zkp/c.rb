@@ -68,6 +68,10 @@ module Secp256k1zkp
     # int secp256k1_ecdsa_verify(const secp256k1_context *ctx, const secp256k1_ecdsa_signature *sig, const unsigned char *msg32, const secp256k1_pubkey *pubkey)
     attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :pointer, :pointer], :int
 
+    # Tweak
+    # int secp256k1_ec_pubkey_tweak_add(const secp256k1_context* ctx, secp256k1_pubkey *pubkey, const unsigned char *tweak)
+    attach_function :secp256k1_ec_pubkey_tweak_add, [:pointer, :pointer, :pointer], :int
+
     # Recovery module
     begin
       # int secp256k1_ecdsa_recoverable_signature_parse_compact(const secp256k1_context *ctx, secp256k1_ecdsa_recoverable_signature *sig, const unsigned char *input64, int recid)
@@ -110,6 +114,8 @@ module Secp256k1zkp
       attach_function :secp256k1_aggsig_sign_single, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int
       # int secp256k1_aggsig_verify_single(const secp256k1_context* ctx, const unsigned char *sig64, const unsigned char *msg32, const secp256k1_pubkey *pubnonce, const secp256k1_pubkey *pubkey, const secp256k1_pubkey *pubkey_total, const secp256k1_pubkey *extra_pubkey, const int is_partial)
       attach_function :secp256k1_aggsig_verify_single, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :int], :int
+      # int secp256k1_aggsig_add_signatures_single(const secp256k1_context* ctx, unsigned char *sig64, const unsigned char** sigs, size_t num_sigs, const secp256k1_pubkey* pubnonce_total)
+      attach_function :secp256k1_aggsig_add_signatures_single, [:pointer, :pointer, :pointer, :size_t, :pointer], :int
     rescue FFI::NotFoundError
     end
   end

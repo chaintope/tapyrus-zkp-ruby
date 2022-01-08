@@ -74,6 +74,14 @@ module Secp256k1zkp
       ECDH.generate(ctx, self, private_key)
     end
 
+    # Tweak a public key by adding tweak times the generator to it.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Secp256k1zkp::PrivateKey] private_key
+    def tweak_add!(ctx, private_key)
+      res = C.secp256k1_ec_pubkey_tweak_add(ctx.ctx, pointer, private_key.pointer)
+      raise InvalidPrivateKey unless res == 1
+    end
+
     # Override +==+ to check whether same public key or not.
     # @param [Secp256k1zkp::PublicKey] other
     # @return [Boolean]
