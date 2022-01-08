@@ -108,11 +108,18 @@ module Secp256k1zkp
     # Generate private key.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @return [Secp256k1zkp::PrivateKey]
-    # @raise [Secp256k1zkp::InvalidPrivateKey]
     def self.generate(ctx)
       from_hex(ctx, SecureRandom.hex(BYTE_SIZE))
     rescue InvalidPrivateKey
       generate(ctx)
+    end
+
+    # Generate key pair.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @return [Array(Secp256k1zkp::PrivateKey, Secp256k1zkp::PublicKey)]
+    def self.generate_keypair(ctx)
+      private_key = generate(ctx)
+      [private_key, private_key.public_key(ctx)]
     end
 
     # Initialize private key from hex data.
