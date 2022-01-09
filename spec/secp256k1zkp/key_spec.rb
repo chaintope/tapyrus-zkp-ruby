@@ -150,4 +150,16 @@ RSpec.describe 'Key' do
     end
   end
 
+  describe 'PublicKey#from_combination' do
+    it 'combine all public keys' do
+      priv1, pub1 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+      priv2, pub2 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+
+      combined = Secp256k1zkp::PublicKey.from_combination(ctx, pub1, pub2)
+      pub1.tweak_add!(ctx, priv2.to_i)
+      pub2.tweak_add!(ctx, priv1.to_i)
+      expect(combined).to eq(pub1)
+      expect(combined).to eq(pub2)
+    end
+  end
 end

@@ -39,6 +39,23 @@ module Secp256k1zkp
       pubkey
     end
 
+    # Add a number of public keys together.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Array(Secp256k1zkp::PublicKey)] public_keys public keys to be added.
+    # @return [Secp256k1zkp::PublicKey]
+    # @raise [InvalidPublicKey]
+    def self.from_combination(ctx, *public_keys)
+      public_key = PublicKey.new
+      pubkeys_ptr = FFI::MemoryPointer.new(:pointer, public_keys.length)
+      public_keys.each_with_index do |key, i|
+        pubkeys_ptr[i].put_pointer(0, key.pointer)
+      end
+      res = C.secp256k1_ec_pubkey_combine(ctx.ctx, public_key.pointer, pubkeys_ptr, public_keys.length)
+      raise InvalidPublicKey unless res == 1
+
+      public_key
+    end
+
     # Generate public key hex string.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Boolean] compressed whether compressed public key or not.
