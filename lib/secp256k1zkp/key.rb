@@ -95,8 +95,10 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar
     # @raise [ArgumentError]
+    # @raise [IncapableContext]
     def tweak_add!(ctx, scalar)
       raise ArgumentError unless scalar.is_a?(Integer)
+      raise IncapableContext if ctx.caps?(SECP256K1_CONTEXT_SIGN) || ctx.caps?(SECP256K1_CONTEXT_NONE)
 
       tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
       res = C.secp256k1_ec_pubkey_tweak_add(ctx.ctx, pointer, tweak)

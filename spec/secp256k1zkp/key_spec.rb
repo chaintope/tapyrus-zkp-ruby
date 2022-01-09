@@ -121,8 +121,8 @@ RSpec.describe 'Key' do
 
     context 'bad context' do
       it 'should raise Secp256k1zkp::IncapableContext' do
-        expect { key.tweak_mul!(ctx_none, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
-        expect { key.tweak_mul!(ctx_sign, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
+        expect { key.tweak_add!(ctx_none, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
+        expect { key.tweak_add!(ctx_sign, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
       end
     end
   end
