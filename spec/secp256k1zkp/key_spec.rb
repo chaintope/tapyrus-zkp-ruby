@@ -112,6 +112,11 @@ RSpec.describe 'Key' do
     it 'should be tweaked' do
       key.tweak_add!(ctx_verify, scalar)
       expect(key.to_hex(ctx_verify)).to eq('0294887f54f01be8675cf844bd88ad37b83544f153819c9b78446fed58940cd040')
+
+      priv1, pub1 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+      priv1.tweak_add!(ctx, scalar)
+      pub1.tweak_add!(ctx, scalar)
+      expect(priv1.public_key(ctx)).to eq(pub1)
     end
 
     context 'bad context' do
@@ -121,4 +126,5 @@ RSpec.describe 'Key' do
       end
     end
   end
+
 end

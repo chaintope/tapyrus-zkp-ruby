@@ -225,6 +225,22 @@ module Secp256k1zkp
       to_hex.to_i(16)
     end
 
+    # Tweak a private key by adding tweak to it.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Integer] scalar tweak value.
+    # @raise [ArgumentError]
+    # @raise [AssertError]
+    def tweak_add!(ctx, scalar)
+      raise ArgumentError unless scalar.is_a?(Integer)
+
+      priv_ptr = pointer
+      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
+      res = C.secp256k1_ec_privkey_tweak_add(ctx.ctx, priv_ptr, tweak)
+      raise AssertError, 'secp256k1_ec_privkey_tweak_add failed' unless res == 1
+
+      @key = priv_ptr.read_bytes(BYTE_SIZE)
+    end
+
     # Tweak a private key by multiplying it by a +scalar+.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
