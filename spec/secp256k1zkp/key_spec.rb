@@ -127,4 +127,27 @@ RSpec.describe 'Key' do
     end
   end
 
+  describe 'negate' do
+    it 'should be calculated' do
+      priv1, pub1 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+      priv2 = priv1.dup
+      priv2.negate!(ctx)
+      expect(priv1).not_to eq(priv2)
+      priv2.negate!(ctx)
+      expect(priv1).to eq(priv2)
+
+      pub2 = pub1.dup
+      pub2.negate!(ctx)
+      expect(pub1).not_to eq(pub2)
+      pub2.negate!(ctx)
+      expect(pub1).to eq(pub2)
+
+      priv3 = priv1.dup
+      pub3 = priv3.public_key(ctx)
+      priv3.negate!(ctx)
+      pub3.negate!(ctx)
+      expect(pub3).to eq(priv3.public_key(ctx))
+    end
+  end
+
 end

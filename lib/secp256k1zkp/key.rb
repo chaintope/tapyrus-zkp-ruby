@@ -100,6 +100,13 @@ module Secp256k1zkp
       raise AssertError, 'secp256k1_ec_pubkey_tweak_mul failed' unless res == 1
     end
 
+    # Negates a public key in place.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    def negate!(ctx)
+      res = C.secp256k1_ec_pubkey_negate(ctx.ctx, pointer)
+      raise AssertError, 'secp256k1_ec_pubkey_negate failed' unless res == 1
+    end
+
     # Override +==+ to check whether same public key or not.
     # @param [Secp256k1zkp::PublicKey] other
     # @return [Boolean]
@@ -213,6 +220,15 @@ module Secp256k1zkp
       FFI::MemoryPointer.new(:uchar, BYTE_SIZE).put_bytes(0, key)
     end
 
+    # Override +==+ to check whether same private key or not.
+    # @param [Secp256k1zkp::PublicKey] other
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(PrivateKey)
+
+      to_hex == other.to_hex
+    end
+
     # Convert private key to hex.
     # @return [String]
     def to_hex
@@ -233,12 +249,11 @@ module Secp256k1zkp
     def tweak_add!(ctx, scalar)
       raise ArgumentError unless scalar.is_a?(Integer)
 
-      priv_ptr = pointer
-      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
-      res = C.secp256k1_ec_privkey_tweak_add(ctx.ctx, priv_ptr, tweak)
-      raise AssertError, 'secp256k1_ec_privkey_tweak_add failed' unless res == 1
-
-      @key = priv_ptr.read_bytes(BYTE_SIZE)
+      process_with_update do |pointer|
+        tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
+        res = C.secp256k1_ec_privkey_tweak_add(ctx.ctx, pointer, tweak)
+        raise AssertError, 'secp256k1_ec_privkey_tweak_add failed' unless res == 1
+      end
     end
 
     # Tweak a private key by multiplying it by a +scalar+.
@@ -249,11 +264,27 @@ module Secp256k1zkp
     def tweak_mul!(ctx, scalar)
       raise ArgumentError unless scalar.is_a?(Integer)
 
-      priv_ptr = pointer
-      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
-      res = C.secp256k1_ec_privkey_tweak_mul(ctx.ctx, priv_ptr, tweak)
-      raise AssertError, 'secp256k1_ec_privkey_tweak_mul failed' unless res == 1
+      process_with_update do |pointer|
+        tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
+        res = C.secp256k1_ec_privkey_tweak_mul(ctx.ctx, pointer, tweak)
+        raise AssertError, 'secp256k1_ec_privkey_tweak_mul failed' unless res == 1
+      end
+    end
 
+    # Negates a private key in place.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    def negate!(ctx)
+      process_with_update do |pointer|
+        res = C.secp256k1_ec_privkey_negate(ctx.ctx, pointer)
+        raise AssertError, 'secp256k1_ec_privkey_negate failed' unless res == 1
+      end
+    end
+
+    private
+
+    def process_with_update
+      priv_ptr = pointer
+      yield(priv_ptr)
       @key = priv_ptr.read_bytes(BYTE_SIZE)
     end
   end
