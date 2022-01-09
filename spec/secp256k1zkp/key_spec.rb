@@ -162,4 +162,25 @@ RSpec.describe 'Key' do
       expect(combined).to eq(pub2)
     end
   end
+
+  describe 'PrivateKey#inv!' do
+    it 'should inverse' do
+      one = Secp256k1zkp::PrivateKey.from_hex(ctx, '0000000000000000000000000000000000000000000000000000000000000001')
+      one_inv = one.dup
+      one_inv.inv!(ctx)
+      expect(one_inv).to eq(one)
+
+      priv1 = Secp256k1zkp::PrivateKey.generate(ctx)
+      priv2 = priv1.dup
+      priv2.inv!(ctx)
+      priv2.inv!(ctx)
+      expect(priv2).to eq(priv1)
+
+      priv1 = Secp256k1zkp::PrivateKey.generate(ctx)
+      priv2 = priv1.dup
+      priv2.inv!(ctx)
+      priv2.tweak_mul!(ctx, priv1.to_i)
+      expect(priv2).to eq(one)
+    end
+  end
 end

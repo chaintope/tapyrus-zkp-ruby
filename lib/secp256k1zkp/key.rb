@@ -297,6 +297,15 @@ module Secp256k1zkp
       end
     end
 
+    # Tweak a private key by inverting it.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    def inv!(ctx)
+      process_with_update do |pointer|
+        res = C.secp256k1_ec_privkey_tweak_inv(ctx.ctx, pointer)
+        raise AssertError, 'secp256k1_ec_privkey_tweak_inv failed' unless res == 1
+      end
+    end
+
     private
 
     def process_with_update
