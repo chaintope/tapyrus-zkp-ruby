@@ -78,6 +78,8 @@ module Secp256k1zkp
     attach_function :secp256k1_ec_pubkey_tweak_add, [:pointer, :pointer, :pointer], :int
     # int secp256k1_ec_pubkey_tweak_mul(const secp256k1_context* ctx, secp256k1_pubkey *pubkey, const unsigned char *tweak)
     attach_function :secp256k1_ec_pubkey_tweak_mul, [:pointer, :pointer, :pointer], :int
+    # int secp256k1_ec_privkey_tweak_mul(const secp256k1_context* ctx, unsigned char *seckey, const unsigned char *tweak)
+    attach_function :secp256k1_ec_privkey_tweak_mul, [:pointer, :pointer, :pointer], :int
 
     # Recovery module
     begin

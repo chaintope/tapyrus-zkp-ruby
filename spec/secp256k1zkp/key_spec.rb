@@ -82,4 +82,20 @@ RSpec.describe 'Key' do
       end
     end
   end
+
+  describe 'PrivateKey#tweak_mul!' do
+    let(:key) { Secp256k1zkp::PrivateKey.from_hex(ctx_none, 'c3f66d1051dfc546636b9f966a6f54932ea1db7087224e1b0e0d1a7eb756f7be') }
+
+    it 'should be tweaked' do
+      scalar = 0x559359ae20f852dc89cad18cebdcae0b4abd06c5f014bcbca8a26cdd3dcdb6b1
+      key.tweak_mul!(ctx_none, scalar)
+      expect(key.public_key(ctx).to_hex(ctx_verify)).to eq('02ff93dc38492c8d7405e3709e09f7e735b0bba85c62a87098d072b8c18cf75306')
+
+      scalar = SecureRandom.hex(32).to_i(16)
+      priv1, pub1 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+      priv1.tweak_mul!(ctx, scalar)
+      pub1.tweak_mul!(ctx, scalar)
+      expect(priv1.public_key(ctx)).to eq(pub1)
+    end
+  end
 end
