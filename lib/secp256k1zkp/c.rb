@@ -38,6 +38,11 @@ module Secp256k1zkp
     # int secp256k1_context_randomize(secp256k1_context* ctx, const unsigned char *seed32)
     attach_function :secp256k1_context_randomize, [:pointer, :pointer], :int
 
+    # secp256k1_scratch_space_createconst secp256k1_context* ctx, size_t max_size)
+    attach_function :secp256k1_scratch_space_create, [:pointer, :size_t], :pointer
+    # void secp256k1_scratch_space_destroy(secp256k1_scratch_space* scratch)
+    attach_function :secp256k1_scratch_space_destroy, [:pointer], :void
+
     # Pubkey
     # int secp256k1_ec_pubkey_parse(const secp256k1_context* ctx, secp256k1_pubkey* pubkey, const unsigned char *input, size_t inputlen)
     attach_function :secp256k1_ec_pubkey_parse, [:pointer, :pointer, :pointer, :size_t], :int
@@ -116,6 +121,13 @@ module Secp256k1zkp
       attach_function :secp256k1_aggsig_verify_single, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :int], :int
       # int secp256k1_aggsig_add_signatures_single(const secp256k1_context* ctx, unsigned char *sig64, const unsigned char** sigs, size_t num_sigs, const secp256k1_pubkey* pubnonce_total)
       attach_function :secp256k1_aggsig_add_signatures_single, [:pointer, :pointer, :pointer, :size_t, :pointer], :int
+    rescue FFI::NotFoundError
+    end
+
+    # Schnorrsig module
+    begin
+      # int secp256k1_schnorrsig_verify_batch(const secp256k1_context* ctx, secp256k1_scratch_space* scratch, const secp256k1_schnorrsig* const* sig, const unsigned char* const* msg32, const secp256k1_pubkey* const* pk,	size_t n_sigs)
+      attach_function :secp256k1_schnorrsig_verify_batch, [:pointer, :pointer, :pointer, :pointer, :pointer, :size_t], :int
     rescue FFI::NotFoundError
     end
   end

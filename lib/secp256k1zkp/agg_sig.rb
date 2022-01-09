@@ -3,6 +3,8 @@
 module Secp256k1zkp
   module AggSig
 
+    SCRATCH_SPACE_SIZE = 1024 * 1024
+
     class PartialSignature < FFI::Struct
       layout :data, [:uchar, 32]
     end
@@ -163,6 +165,32 @@ module Secp256k1zkp
       raise InvalidSignature unless res == 1
 
       sig
+    end
+
+    # Batch Schnorr signature verification
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Array(Secp256k1zkp::ECDSA::Signature)] sigs
+    # @param [Array(String)] msgs
+    # @param [Array(Secp256k1zkp::PublicKey)] public_keys
+    # @return [Boolean]
+    def verify_batch(ctx, sigs, msgs, public_keys)
+      return false if sigs.length != msgs.length || msgs.length != public_keys.length
+
+      sigs_ptr = FFI::MemoryPointer.new(:pointer, sigs.length)
+      sigs.each_with_index do |sig, i|
+        sigs_ptr[i].put_pointer(0, sig.pointer)
+      end
+      msgs_ptr = FFI::MemoryPointer.new(:pointer, msgs.length)
+      msgs.each_with_index do |msg, i|
+        msgs_ptr[i].put_pointer(0, FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg))
+      end
+      public_keys_ptr = FFI::MemoryPointer.new(:pointer, public_keys.length)
+      public_keys.each_with_index do |public_key, i|
+        public_keys_ptr[i].put_pointer(0, public_key.pointer)
+      end
+      space = FFI::AutoPointer.new(C.secp256k1_scratch_space_create(ctx.ctx, SCRATCH_SPACE_SIZE), C.method(:secp256k1_scratch_space_destroy))
+      res = C.secp256k1_schnorrsig_verify_batch(ctx.ctx, space, sigs_ptr, msgs_ptr, public_keys_ptr, sigs.length)
+      res == 1
     end
   end
 end

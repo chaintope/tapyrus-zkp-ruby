@@ -102,4 +102,27 @@ RSpec.describe Secp256k1zkp::AggSig do
       end
     end
   end
+
+  describe 'Aggsig batch' do
+    it do
+      sigs = []
+      msgs = []
+      public_keys = []
+
+      100.times do
+        private_key, public_key = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+        msg = SecureRandom.bytes(32)
+        sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key, publick_key_for_e: public_key)
+        result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, pubkey_total: public_key)
+        expect(result).to be true
+        public_keys << public_key
+        sigs << sig
+        msgs << msg
+      end
+
+      # verify aggsig batch
+      result = Secp256k1zkp::AggSig.verify_batch(ctx, sigs, msgs, public_keys)
+      expect(result).to be true
+    end
+  end
 end
