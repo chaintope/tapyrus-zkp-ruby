@@ -143,7 +143,10 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @return [Secp256k1zkp::PublicKey]
     # @raise [Secp256k1zkp::AssertError]
+    # @raise [Secp256k1zkp::IncapableContext]
     def public_key(ctx)
+      raise IncapableContext if ctx.caps?(SECP256K1_CONTEXT_VERIFY) || ctx.caps?(SECP256K1_CONTEXT_NONE)
+
       public_key = PublicKey.new
       res = C.secp256k1_ec_pubkey_create(ctx.ctx, public_key.pointer, pointer)
       raise AssertError, 'secp256k1_ec_pubkey_create failed' unless res == 1

@@ -20,6 +20,8 @@ module Secp256k1zkp
   class InvalidPrivateKey < Error; end
   class InvalidSignature < Error; end
   class PartialSigFailure < Error; end
+  # A Secp256k1zkp was used for an operation, but it was not created to support this.
+  class IncapableContext < Error; end
 
   ZERO_256 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].freeze
 

@@ -35,3 +35,15 @@ end
 def hex!(hex)
   [hex].pack('H*')
 end
+
+def context_none
+  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_NONE)
+end
+
+def context_verify
+  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_VERIFY)
+end
+
+def context_sign
+  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_SIGN)
+end

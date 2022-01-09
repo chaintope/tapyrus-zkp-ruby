@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Secp256k1zkp::ECDH do
 
-  let(:ctx) { Secp256k1zkp::Context.new(flags: Secp256k1zkp::SECP256K1_CONTEXT_SIGN) }
+  let(:ctx) { Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_SIGN) }
 
   describe 'SharedSecret' do
     it 'should generate shared secret' do
