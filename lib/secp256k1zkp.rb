@@ -25,4 +25,11 @@ module Secp256k1zkp
 
   ZERO_256 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].freeze
 
+  class ::Integer
+    def to_even_hex(bytesize = nil)
+      hex = to_s(16)
+      padding = bytesize ? bytesize * 2 : (hex.length / 2.0).ceil * 2
+      hex.rjust(padding, '0')
+    end
+  end
 end

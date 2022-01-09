@@ -74,15 +74,19 @@ module Secp256k1zkp
       ECDH.generate(ctx, self, private_key)
     end
 
-    # Tweak a public key by adding tweak times the generator to it.
+    # Tweak a public key by adding tweak times the generator to it. (P + tG)
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @param [Secp256k1zkp::PrivateKey] private_key
-    def tweak_add!(ctx, private_key)
-      res = C.secp256k1_ec_pubkey_tweak_add(ctx.ctx, pointer, private_key.pointer)
+    # @param [Integer] scalar
+    # @raise [ArgumentError]
+    def tweak_add!(ctx, scalar)
+      raise ArgumentError unless scalar.is_a?(Integer)
+
+      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
+      res = C.secp256k1_ec_pubkey_tweak_add(ctx.ctx, pointer, tweak)
       raise InvalidPrivateKey unless res == 1
     end
 
-    # Tweak a public key by multiplying it by a +scalar+ value.
+    # Tweak a public key by multiplying it by a +scalar+ value. (tP)
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
     # @raise [ArgumentError]
@@ -91,7 +95,7 @@ module Secp256k1zkp
       raise ArgumentError unless scalar.is_a?(Integer)
       raise IncapableContext if ctx.caps?(SECP256K1_CONTEXT_SIGN) || ctx.caps?(SECP256K1_CONTEXT_NONE)
 
-      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_s(16)].pack('H*'))
+      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
       res = C.secp256k1_ec_pubkey_tweak_mul(ctx.ctx, pointer, tweak)
       raise AssertError, 'secp256k1_ec_pubkey_tweak_mul failed' unless res == 1
     end
@@ -209,6 +213,18 @@ module Secp256k1zkp
       FFI::MemoryPointer.new(:uchar, BYTE_SIZE).put_bytes(0, key)
     end
 
+    # Convert private key to hex.
+    # @return [String]
+    def to_hex
+      key.unpack1('H*')
+    end
+
+    # Convert private key to integer.
+    # @return [Integer]
+    def to_i
+      to_hex.to_i(16)
+    end
+
     # Tweak a private key by multiplying it by a +scalar+.
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
@@ -218,7 +234,7 @@ module Secp256k1zkp
       raise ArgumentError unless scalar.is_a?(Integer)
 
       priv_ptr = pointer
-      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_s(16)].pack('H*'))
+      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_even_hex(32)].pack('H*'))
       res = C.secp256k1_ec_privkey_tweak_mul(ctx.ctx, priv_ptr, tweak)
       raise AssertError, 'secp256k1_ec_privkey_tweak_mul failed' unless res == 1
 

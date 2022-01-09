@@ -66,13 +66,13 @@ RSpec.describe Secp256k1zkp::AggSig do
 
         # Get total nonce
         nonce_sum = receiver_secnonce.public_key(ctx).dup
-        nonce_sum.tweak_add!(ctx, sender_secnonce)
+        nonce_sum.tweak_add!(ctx, sender_secnonce.to_i)
 
         msg = SecureRandom.bytes(32)
 
         # Add public keys (for storing in e)
         pubkey_sum = receiver_pub.dup
-        pubkey_sum.tweak_add!(ctx, sender_private)
+        pubkey_sum.tweak_add!(ctx, sender_private.to_i)
 
         # Sender sign
         sender_sig = Secp256k1zkp::AggSig.sign_single(
