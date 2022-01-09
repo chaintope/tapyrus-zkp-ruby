@@ -52,18 +52,34 @@ RSpec.describe 'Key' do
       private_key = Secp256k1zkp::PrivateKey.from_hex(ctx, '206f3acb5b7ac66dacf87910bb0b04bed78284b9b50c0d061705a44447a947ff')
       expect(private_key.public_key(ctx).to_hex(ctx)).to eq('020025aeb645b64b632c91d135683e227cb508ebb1766c65ee40405f53b8f1bb3a')
       # context sign
-      expect { private_key.public_key(context_sign) }.not_to raise_error(Secp256k1zkp::IncapableContext)
+      expect { private_key.public_key(ctx_sign) }.not_to raise_error(Secp256k1zkp::IncapableContext)
     end
 
     context 'bad context' do
       it do
         private_key = Secp256k1zkp::PrivateKey.from_hex(ctx, '206f3acb5b7ac66dacf87910bb0b04bed78284b9b50c0d061705a44447a947ff')
         # context none
-        expect { private_key.public_key(context_none) }.to raise_error(Secp256k1zkp::IncapableContext)
+        expect { private_key.public_key(ctx_none) }.to raise_error(Secp256k1zkp::IncapableContext)
         # context verify
-        expect { private_key.public_key(context_verify) }.to raise_error(Secp256k1zkp::IncapableContext)
+        expect { private_key.public_key(ctx_verify) }.to raise_error(Secp256k1zkp::IncapableContext)
       end
     end
   end
 
+  describe 'PublicKey#tweak_mul!' do
+    let(:key) { Secp256k1zkp::PublicKey.from_hex(ctx_none, '024175217e076deb6463831fce1ce271ef1f9e277e0dae071cb0039c38c50f19f2') }
+
+    it 'should be tweaked' do
+      scalar = 0x559359ae20f852dc89cad18cebdcae0b4abd06c5f014bcbca8a26cdd3dcdb6b1
+      key.tweak_mul!(ctx_verify, scalar)
+      expect(key.to_hex(ctx_verify)).to eq('02ff93dc38492c8d7405e3709e09f7e735b0bba85c62a87098d072b8c18cf75306')
+    end
+
+    context 'bad context' do
+      it 'should raise Secp256k1zkp::IncapableContext' do
+        expect { key.tweak_mul!(ctx_none, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
+        expect { key.tweak_mul!(ctx_sign, 1) }.to raise_error(Secp256k1zkp::IncapableContext)
+      end
+    end
+  end
 end

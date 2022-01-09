@@ -82,6 +82,18 @@ module Secp256k1zkp
       raise InvalidPrivateKey unless res == 1
     end
 
+    # Tweak a public key by multiplying it by a +scalar+ value.
+    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [Integer] scalar tweak value.
+    def tweak_mul!(ctx, scalar)
+      raise ArgumentError unless scalar.is_a?(Integer)
+      raise IncapableContext if ctx.caps?(SECP256K1_CONTEXT_SIGN) || ctx.caps?(SECP256K1_CONTEXT_NONE)
+
+      tweak = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, [scalar.to_s(16)].pack('H*'))
+      res = C.secp256k1_ec_pubkey_tweak_mul(ctx.ctx, pointer, tweak)
+      raise AssertError, 'secp256k1_ec_pubkey_tweak_mul failed' unless res == 1
+    end
+
     # Override +==+ to check whether same public key or not.
     # @param [Secp256k1zkp::PublicKey] other
     # @return [Boolean]

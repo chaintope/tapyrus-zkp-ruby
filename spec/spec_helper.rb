@@ -36,14 +36,14 @@ def hex!(hex)
   [hex].pack('H*')
 end
 
-def context_none
+def ctx_none
   Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_NONE)
 end
 
-def context_verify
+def ctx_verify
   Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_VERIFY)
 end
 
-def context_sign
+def ctx_sign
   Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_SIGN)
 end
