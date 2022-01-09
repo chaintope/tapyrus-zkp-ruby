@@ -292,8 +292,8 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     def negate!(ctx)
       process_with_update do |pointer|
-        res = C.secp256k1_ec_privkey_negate(ctx.ctx, pointer)
-        raise AssertError, 'secp256k1_ec_privkey_negate failed' unless res == 1
+        res = C.secp256k1_ec_privkey_tweak_neg(ctx.ctx, pointer)
+        raise AssertError, 'secp256k1_ec_privkey_tweak_neg failed' unless res == 1
       end
     end
 
