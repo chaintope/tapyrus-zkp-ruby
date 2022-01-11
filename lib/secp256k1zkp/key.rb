@@ -178,8 +178,11 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
     # @param [String] key private key with hex format.
     # @return [Secp256k1zkp::PrivateKey]
+    # @raise [Secp256k1zkp::InvalidPrivateKey]
     def self.from_hex(ctx, privkey_hex)
       raw_priv = [privkey_hex].pack('H*')
+      raise InvalidPrivateKey, 'private key should be 32 bytes' unless raw_priv.unpack1('H*') == privkey_hex
+
       PrivateKey.new(ctx, raw_priv)
     end
 

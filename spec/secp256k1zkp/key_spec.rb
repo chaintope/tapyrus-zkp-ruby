@@ -36,6 +36,9 @@ RSpec.describe 'Key' do
         # over max range
         key = 'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'
         expect { Secp256k1zkp::PrivateKey.from_hex(ctx, key) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
+        # not 32 bytes
+        key = '06f3acb5b7ac66dacf87910bb0b04bed78284b9b50c0d061705a44447a947ff'
+        expect { Secp256k1zkp::PrivateKey.from_hex(ctx, key) }.to raise_error(Secp256k1zkp::InvalidPrivateKey)
       end
     end
 
