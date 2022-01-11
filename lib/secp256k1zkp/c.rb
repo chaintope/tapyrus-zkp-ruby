@@ -21,6 +21,7 @@ module Secp256k1zkp
   SECP256K1_CONTEXT_SIGN = (SECP256K1_FLAGS_TYPE_CONTEXT | SECP256K1_FLAGS_BIT_CONTEXT_SIGN)
   SECP256K1_CONTEXT_NONE = SECP256K1_FLAGS_TYPE_CONTEXT
   SECP256K1_CONTEXT_FULL = (SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN)
+  SECP256K1_CONTEXT_COMMIT = (SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN)
 
   # FFI bindings
   module C
@@ -142,6 +143,15 @@ module Secp256k1zkp
     begin
       # int secp256k1_schnorrsig_verify_batch(const secp256k1_context* ctx, secp256k1_scratch_space* scratch, const secp256k1_schnorrsig* const* sig, const unsigned char* const* msg32, const secp256k1_pubkey* const* pk,	size_t n_sigs)
       attach_function :secp256k1_schnorrsig_verify_batch, [:pointer, :pointer, :pointer, :pointer, :pointer, :size_t], :int
+    rescue FFI::NotFoundError
+    end
+
+    # Commitment module
+    begin
+      # int secp256k1_pedersen_commitment_parse(const secp256k1_context* ctx, secp256k1_pedersen_commitment* commit, const unsigned char *input)
+      attach_function :secp256k1_pedersen_commitment_parse, [:pointer, :pointer, :pointer], :int
+      # int secp256k1_pedersen_commitment_serialize(const secp256k1_context* ctx, unsigned char *output, const secp256k1_pedersen_commitment* commit)
+      attach_function :secp256k1_pedersen_commitment_serialize, [:pointer, :pointer, :pointer], :int
     rescue FFI::NotFoundError
     end
   end
