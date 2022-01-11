@@ -20,4 +20,19 @@ RSpec.describe Secp256k1zkp::Pedersen do
       end
     end
   end
+
+  describe 'Commitment#generate' do
+    it 'should generate commitment' do
+      value = 1
+      blind1 = SecureRandom.hex(32).to_i(16)
+      blind2 = 1
+      commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, value, blind1)
+      commit2 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, blind2, blind1)
+      expect(commit1).to eq(commit2)
+      value = 2
+      commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, value, blind1)
+      commit2 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, blind2, blind1)
+      expect(commit1).not_to eq(commit2)
+    end
+  end
 end

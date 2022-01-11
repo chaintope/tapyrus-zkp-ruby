@@ -12,6 +12,28 @@ module Secp256k1zkp
       SIZE = 33 # The size of a Pedersen commitment
       SIZE_INTERNAL = 64 # The size of a Pedersen commitment
 
+      # Generate a Pedersen commitment.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Integer] value value to commit to.
+      # @param [Integer] blind blinding factor.
+      # @param [Secp256k1zkp::Generator] value_gen value generator 'h'
+      # @param [Secp256k1zkp::Generator] blind_gen blinding factor generator 'g'
+      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @raise [ArgumentError]
+      # @raise [Secp256k1zkp::InvalidFactor]
+      def self.generate(ctx, value, blind, value_gen: Secp256k1zkp.generator_h_ptr, blind_gen: Secp256k1zkp.generator_g_ptr)
+        raise ArgumentError unless blind.is_a?(Integer)
+        raise ArgumentError unless value.is_a?(Integer)
+
+        commitment = Commitment.new
+        raw_blind = [blind.to_even_hex(32)].pack('H*')
+        raw_blind_ptr = FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, raw_blind)
+        res = C.secp256k1_pedersen_commit(ctx.ctx, commitment.pointer, raw_blind_ptr, value, value_gen, blind_gen)
+        raise InvalidFactor unless res == 1
+
+        commitment
+      end
+
       # Parse a 33-bytes commitment into a commitment object.
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
       # @param [String] hex_commitment 33-bytes serialized commitment key.
@@ -37,6 +59,15 @@ module Secp256k1zkp
 
         C.secp256k1_pedersen_commitment_serialize(ctx.ctx, hex_ptr, pointer)
         hex_ptr.read_bytes(SIZE).unpack1('H*')
+      end
+
+      # Override +==+ to check whether same public key or not.
+      # @param [Secp256k1zkp::Pedersen::Commitment] other
+      # @return [Boolean]
+      def ==(other)
+        return false unless other.is_a?(Commitment)
+
+        self[:data].to_a == other[:data].to_a
       end
     end
 

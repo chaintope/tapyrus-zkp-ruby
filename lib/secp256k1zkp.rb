@@ -9,6 +9,7 @@ require 'secp256k1zkp/key'
 require 'secp256k1zkp/ecdsa'
 require 'secp256k1zkp/ecdh'
 require 'secp256k1zkp/agg_sig'
+require 'secp256k1zkp/generator'
 require 'secp256k1zkp/pedersen'
 
 # Nimbleness's secp256k1-zkp binding.
@@ -24,6 +25,7 @@ module Secp256k1zkp
   # A Secp256k1zkp was used for an operation, but it was not created to support this.
   class IncapableContext < Error; end
   class InvalidCommit < Error; end
+  class InvalidFactor < Error; end
 
   ZERO_256 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].freeze
 
