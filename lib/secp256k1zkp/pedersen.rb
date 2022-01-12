@@ -76,8 +76,8 @@ module Secp256k1zkp
 
       # Computes the sum of multiple positive and negative pedersen commitments
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @param [Array(Integer)] positives array of positive commitments
-      # @param [Array(Integer)] negatives array of negative commitments
+      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] positives array of positive commitments
+      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] negatives array of negative commitments
       # @return [Secp256k1zkp::Pedersen::Commitment]
       # @raise [Secp256k1zkp::IncorrectCommitSum]
       def self.commit_sum(ctx, positives, negatives)
@@ -94,6 +94,21 @@ module Secp256k1zkp
         raise IncorrectCommitSum unless res == 1
 
         commit
+      end
+
+      # Verify a tally of Pedersen commitments
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] positives array of positive commitments
+      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] negatives array of negative commitments
+      # @return [Boolean]
+      def self.valid_commit_sum?(ctx, positives, negatives)
+        positive_ptr = FFI::MemoryPointer.new(:pointer, positives.length)
+        positives.each_with_index { |commit, i| positive_ptr[i].put_pointer(0, commit.pointer) }
+        negative_ptr = FFI::MemoryPointer.new(:pointer, negatives.length)
+        negatives.each_with_index { |commit, i| negative_ptr[i].put_pointer(0, commit.pointer) }
+
+        res = C.secp256k1_pedersen_verify_tally(ctx.ctx, positive_ptr, positives.length, negative_ptr, negatives.length)
+        res == 1
       end
 
       # Convert commitment to a serialized hex string.

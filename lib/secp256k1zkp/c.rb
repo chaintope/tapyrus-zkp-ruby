@@ -158,6 +158,8 @@ module Secp256k1zkp
       attach_function :secp256k1_pedersen_blind_sum, [:pointer, :pointer, :pointer, :size_t, :size_t], :int
       # int secp256k1_pedersen_commit_sum(const secp256k1_context* ctx, secp256k1_pedersen_commitment *commit_out, const secp256k1_pedersen_commitment * const* commits, size_t pcnt, const secp256k1_pedersen_commitment * const* ncommits, size_t ncnt)
       attach_function :secp256k1_pedersen_commit_sum, [:pointer, :pointer, :pointer, :size_t, :pointer, :size_t], :int
+      # int secp256k1_pedersen_verify_tally(const secp256k1_context* ctx, const secp256k1_pedersen_commitment * const* pos, size_t n_pos, const secp256k1_pedersen_commitment * const* neg, size_t n_neg)
+      attach_function :secp256k1_pedersen_verify_tally, [:pointer, :pointer, :size_t, :pointer, :size_t], :int
     rescue FFI::NotFoundError
     end
   end
