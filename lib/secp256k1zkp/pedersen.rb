@@ -51,6 +51,18 @@ module Secp256k1zkp
         commitment
       end
 
+      # Convert commitment from public key.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Secp256k1zkp::PublicKey] public_key public key
+      # @return [Secp256k1zkp::Pedersen::Commitment]
+      def self.from_public_key(ctx, public_key)
+        commitment = Commitment.new
+        res = C.secp256k1_pubkey_to_pedersen_commitment(ctx.ctx, commitment.pointer, public_key.pointer)
+        raise InvalidCommit unless res == 1
+
+        commitment
+      end
+
       # Computes the sum of multiple positive and negative blinding factors.
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
       # @param [Array(Integer)] positives array of positive blind factors
@@ -148,6 +160,8 @@ module Secp256k1zkp
 
       # Convert commitment to public key.
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @return [Secp256k1zkp::PublicKey]
+      # @raise [Secp256k1zkp::InvalidPublicKey]
       def to_public_key(ctx)
         public_key = PublicKey.new
         res = C.secp256k1_pedersen_commitment_to_pubkey(ctx.ctx, public_key, pointer)
