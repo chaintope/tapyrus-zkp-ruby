@@ -111,6 +111,31 @@ module Secp256k1zkp
         res == 1
       end
 
+      # Compute a blinding factor using a switch commitment.
+      # Calculates the blinding factor x' = x + SHA256(xG+vH | xJ), used in the switch commitment x'G+vH
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Integer] value value to commit to.
+      # @param [Integer] blind blinding factor.
+      # @return [Integer] blind factor for switch commitment
+      # @raise [Secp256k1zkp::AssertError]
+      def self.blind_switch(ctx, value, blind)
+        switch = FFI::MemoryPointer.new(:uchar, 32)
+        raw_blind = [blind.to_even_hex(32)].pack('H*')
+
+        res = C.secp256k1_blind_switch(
+          ctx.ctx,
+          switch,
+          FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, raw_blind),
+          value,
+          Secp256k1zkp.generator_h_ptr,
+          Secp256k1zkp.generator_g_ptr,
+          Secp256k1zkp.generator_j_ptr
+        )
+        raise AssertError, 'secp256k1_blind_switch failed' unless res == 1
+
+        switch.read_bytes(32).unpack1('H*').to_i(16)
+      end
+
       # Convert commitment to a serialized hex string.
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
       # @return [String] hex string.

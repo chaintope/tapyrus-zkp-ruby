@@ -103,4 +103,19 @@ RSpec.describe Secp256k1zkp::Pedersen do
       end
     end
   end
+
+  describe 'Commitment#blind_switch' do
+    it do
+      pos_value = 101
+      neg_value = 75
+      blind_pos = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, pos_value, SecureRandom.hex(32).to_i(16))
+      blind_neg = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, neg_value, SecureRandom.hex(32).to_i(16))
+      blind_sum = Secp256k1zkp::Pedersen::Commitment.blind_sum(ctx, [blind_pos], [blind_neg])
+      diff = pos_value - neg_value
+      commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, pos_value, blind_pos)
+      commit2 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, neg_value, blind_neg)
+      commit3 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, diff, blind_sum)
+      expect(Secp256k1zkp::Pedersen::Commitment.valid_commit_sum?(ctx, [commit1], [commit2, commit3])).to be true
+    end
+  end
 end
