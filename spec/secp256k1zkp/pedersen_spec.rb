@@ -35,4 +35,23 @@ RSpec.describe Secp256k1zkp::Pedersen do
       expect(commit1).not_to eq(commit2)
     end
   end
+
+  describe 'Commitment#blind_sum' do
+    it 'should generate sum of blind commitment' do
+      blind_a = SecureRandom.hex(32).to_i(16)
+      blind_b = SecureRandom.hex(32).to_i(16)
+
+      commit_a = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 3, blind_a)
+      commit_b = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 2, blind_b)
+      blind_c = Secp256k1zkp::Pedersen::Commitment.blind_sum(ctx, [blind_a, blind_b], [])
+      commit_c = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 3 + 2, blind_c)
+      commit_d = Secp256k1zkp::Pedersen::Commitment.commit_sum(ctx, [commit_a, commit_b], [])
+      expect(commit_c).to eq(commit_d)
+
+      blind_e = Secp256k1zkp::Pedersen::Commitment.blind_sum(ctx, [blind_a], [blind_b])
+      commit_e = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 3 - 2, blind_e)
+      commit_f = Secp256k1zkp::Pedersen::Commitment.commit_sum(ctx, [commit_a], [commit_b])
+      expect(commit_e).to eq(commit_f)
+    end
+  end
 end

@@ -26,6 +26,7 @@ module Secp256k1zkp
   class IncapableContext < Error; end
   class InvalidCommit < Error; end
   class InvalidFactor < Error; end
+  class IncorrectCommitSum < Error; end
 
   ZERO_256 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].freeze
 

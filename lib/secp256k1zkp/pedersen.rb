@@ -51,6 +51,51 @@ module Secp256k1zkp
         commitment
       end
 
+      # Computes the sum of multiple positive and negative blinding factors.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Array(Integer)] positives array of positive blind factors
+      # @param [Array(Integer)] negatives array of negative blind factors
+      def self.blind_sum(ctx, positives, negatives)
+        raise ArgumentError, 'positives should be Array(Integer)' unless positives.is_a?(Array)
+        raise ArgumentError, 'negatives should be Array(Integer)' unless positives.is_a?(Array)
+
+        blind_count = positives.length + negatives.length
+        all = FFI::MemoryPointer.new(:pointer, blind_count)
+        (positives + negatives).each_with_index do |blind, i|
+          raise ArgumentError 'blinding factor should be Integer' unless blind.is_a?(Integer)
+
+          raw_blind = [blind.to_even_hex(32)].pack('H*')
+          all[i].put_pointer(0, FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, raw_blind))
+        end
+        sum = FFI::MemoryPointer.new(:uchar, 32)
+        res = C.secp256k1_pedersen_blind_sum(ctx.ctx, sum, all, blind_count, positives.length)
+        raise AssertError, 'secp256k1_pedersen_blind_sum failed' unless res == 1
+
+        sum.read_bytes(32).unpack1('H*').to_i(16)
+      end
+
+      # Computes the sum of multiple positive and negative pedersen commitments
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [Array(Integer)] positives array of positive commitments
+      # @param [Array(Integer)] negatives array of negative commitments
+      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @raise [Secp256k1zkp::IncorrectCommitSum]
+      def self.commit_sum(ctx, positives, negatives)
+        positive_ptr = FFI::MemoryPointer.new(:pointer, positives.length)
+        negative_ptr = FFI::MemoryPointer.new(:pointer, positives.length)
+        positives.each_with_index do |commit, i|
+          positive_ptr[i].put_pointer(0, commit.pointer)
+        end
+        negatives.each_with_index do |commit, i|
+          negative_ptr[i].put_pointer(0, commit.pointer)
+        end
+        commit = Commitment.new
+        res = C.secp256k1_pedersen_commit_sum(ctx.ctx, commit.pointer, positive_ptr, positives.length, negative_ptr, negatives.length)
+        raise IncorrectCommitSum unless res == 1
+
+        commit
+      end
+
       # Convert commitment to a serialized hex string.
       # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
       # @return [String] hex string.
