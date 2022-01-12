@@ -162,6 +162,8 @@ module Secp256k1zkp
       attach_function :secp256k1_pedersen_verify_tally, [:pointer, :pointer, :size_t, :pointer, :size_t], :int
       # int secp256k1_blind_switch(const secp256k1_context* ctx, unsigned char* blind_switch, const unsigned char* blind, uint64_t value, const secp256k1_generator* value_gen, const secp256k1_generator* blind_gen, const secp256k1_pubkey* switch_pubkey)
       attach_function :secp256k1_blind_switch, [:pointer, :pointer, :pointer, :uint, :pointer, :pointer, :pointer], :int
+      # int secp256k1_pedersen_commitment_to_pubkey(const secp256k1_context* ctx, secp256k1_pubkey* pubkey, const secp256k1_pedersen_commitment* commit)
+      attach_function :secp256k1_pedersen_commitment_to_pubkey, [:pointer, :pointer, :pointer], :int
     rescue FFI::NotFoundError
     end
   end

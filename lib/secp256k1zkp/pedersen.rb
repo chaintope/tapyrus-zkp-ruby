@@ -146,6 +146,16 @@ module Secp256k1zkp
         hex_ptr.read_bytes(SIZE).unpack1('H*')
       end
 
+      # Convert commitment to public key.
+      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      def to_public_key(ctx)
+        public_key = PublicKey.new
+        res = C.secp256k1_pedersen_commitment_to_pubkey(ctx.ctx, public_key, pointer)
+        raise InvalidPublicKey unless res == 1
+
+        public_key
+      end
+
       # Override +==+ to check whether same public key or not.
       # @param [Secp256k1zkp::Pedersen::Commitment] other
       # @return [Boolean]

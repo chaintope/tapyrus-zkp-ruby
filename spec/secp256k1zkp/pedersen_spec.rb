@@ -118,4 +118,12 @@ RSpec.describe Secp256k1zkp::Pedersen do
       expect(Secp256k1zkp::Pedersen::Commitment.valid_commit_sum?(ctx, [commit1], [commit2, commit3])).to be true
     end
   end
+
+  describe 'Commitment#to_public_key' do
+    it 'should convert to public key' do
+      blind = SecureRandom.hex(32).to_i(16)
+      commit = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 5, blind)
+      expect { commit.to_public_key(ctx) }.not_to raise_error
+    end
+  end
 end
