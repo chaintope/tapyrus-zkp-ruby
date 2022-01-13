@@ -78,6 +78,8 @@ module Secp256k1zkp
     # @param [Secp256k1zkp::ECDSA::Signature] sig signature.
     # @return [Boolean]
     def valid_sig?(ctx, msg, sig)
+      raise ArgumentError, 'sig must be Secp256k1zkp::ECDSA::Signature instance' unless sig.is_a?(Secp256k1zkp::ECDSA::Signature)
+
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
       res = C.secp256k1_ecdsa_verify(ctx.ctx, sig.pointer, msg_ptr, pointer)
       res == 1

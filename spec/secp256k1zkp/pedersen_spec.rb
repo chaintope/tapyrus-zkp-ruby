@@ -129,4 +129,15 @@ RSpec.describe Secp256k1zkp::Pedersen do
       expect(new_commit).to eq(commit)
     end
   end
+
+  describe 'sign with public key from commitment' do
+    it do
+      blind = Secp256k1zkp::PrivateKey.generate(ctx)
+      commit = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 0, blind.to_i)
+      msg = SecureRandom.bytes(32)
+      sig = blind.sign(ctx, msg)
+      public_key = commit.to_public_key(ctx)
+      expect(public_key.valid_sig?(ctx, msg, sig)).to be true
+    end
+  end
 end
