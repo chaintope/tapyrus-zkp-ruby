@@ -47,3 +47,7 @@ end
 def ctx_sign
   Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_SIGN)
 end
+
+def generate_scalar
+  SecureRandom.hex(32).to_i(16)
+end

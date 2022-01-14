@@ -101,7 +101,7 @@ RSpec.describe 'Key' do
       key.tweak_mul!(ctx_none, scalar)
       expect(key.public_key(ctx).to_hex(ctx_verify)).to eq('02ff93dc38492c8d7405e3709e09f7e735b0bba85c62a87098d072b8c18cf75306')
 
-      scalar = SecureRandom.hex(32).to_i(16)
+      scalar = generate_scalar
       priv1, pub1 = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
       priv1.tweak_mul!(ctx, scalar)
       pub1.tweak_mul!(ctx, scalar)

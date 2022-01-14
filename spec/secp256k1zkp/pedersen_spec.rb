@@ -24,7 +24,7 @@ RSpec.describe Secp256k1zkp::Pedersen do
   describe 'Commitment#generate' do
     it 'should generate commitment' do
       value = 1
-      blind1 = SecureRandom.hex(32).to_i(16)
+      blind1 = generate_scalar
       blind2 = 1
       commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, value, blind1)
       commit2 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, blind2, blind1)
@@ -38,8 +38,8 @@ RSpec.describe Secp256k1zkp::Pedersen do
 
   describe 'Commitment#blind_sum' do
     it 'should generate sum of blind commitment' do
-      blind_a = SecureRandom.hex(32).to_i(16)
-      blind_b = SecureRandom.hex(32).to_i(16)
+      blind_a = generate_scalar
+      blind_b = generate_scalar
 
       commit_a = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 3, blind_a)
       commit_b = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 2, blind_b)
@@ -92,8 +92,8 @@ RSpec.describe Secp256k1zkp::Pedersen do
 
     context 'random key' do
       it do
-        blind_pos = SecureRandom.hex(32).to_i(16)
-        blind_neg = SecureRandom.hex(32).to_i(16)
+        blind_pos = generate_scalar
+        blind_neg = generate_scalar
         blind_sum = Secp256k1zkp::Pedersen::Commitment.blind_sum(ctx, [blind_pos], [blind_neg])
         commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 101, blind_pos)
         commit2 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 75, blind_neg)
@@ -108,8 +108,8 @@ RSpec.describe Secp256k1zkp::Pedersen do
     it do
       pos_value = 101
       neg_value = 75
-      blind_pos = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, pos_value, SecureRandom.hex(32).to_i(16))
-      blind_neg = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, neg_value, SecureRandom.hex(32).to_i(16))
+      blind_pos = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, pos_value, generate_scalar)
+      blind_neg = Secp256k1zkp::Pedersen::Commitment.blind_switch(ctx, neg_value, generate_scalar)
       blind_sum = Secp256k1zkp::Pedersen::Commitment.blind_sum(ctx, [blind_pos], [blind_neg])
       diff = pos_value - neg_value
       commit1 = Secp256k1zkp::Pedersen::Commitment.generate(ctx, pos_value, blind_pos)
@@ -121,7 +121,7 @@ RSpec.describe Secp256k1zkp::Pedersen do
 
   describe 'Commitment#to_public_key and from_public_key' do
     it do
-      blind = SecureRandom.hex(32).to_i(16)
+      blind = generate_scalar
       commit = Secp256k1zkp::Pedersen::Commitment.generate(ctx, 5, blind)
       public_key = commit.to_public_key(ctx)
       expect(Secp256k1zkp::Pedersen::Commitment.from_public_key(ctx, public_key)).to eq(commit)
