@@ -188,7 +188,7 @@ module Secp256k1zkp
       public_keys.each_with_index do |public_key, i|
         public_keys_ptr[i].put_pointer(0, public_key.pointer)
       end
-      space = FFI::AutoPointer.new(C.secp256k1_scratch_space_create(ctx.ctx, SCRATCH_SPACE_SIZE), C.method(:secp256k1_scratch_space_destroy))
+      space = Secp256k1zkp.create_scratch_space(ctx, SCRATCH_SPACE_SIZE)
       res = C.secp256k1_schnorrsig_verify_batch(ctx.ctx, space, sigs_ptr, msgs_ptr, public_keys_ptr, sigs.length)
       res == 1
     end

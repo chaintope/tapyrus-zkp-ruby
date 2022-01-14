@@ -18,4 +18,14 @@ module Secp256k1zkp
       self.caps == caps
     end
   end
+
+  module_function
+
+  # Create Scratch space pointer
+  # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+  # @param [Integer] size size of scratch space.
+  # @return [FFI::MemoryPointer]
+  def create_scratch_space(ctx, size)
+    FFI::AutoPointer.new(C.secp256k1_scratch_space_create(ctx.ctx, size), C.method(:secp256k1_scratch_space_destroy))
+  end
 end
