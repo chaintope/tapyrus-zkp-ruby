@@ -168,5 +168,48 @@ module Secp256k1zkp
       attach_function :secp256k1_pubkey_to_pedersen_commitment, [:pointer, :pointer, :pointer], :int
     rescue FFI::NotFoundError
     end
+
+    # Bulletproof module
+    begin
+      # secp256k1_bulletproof_generators secp256k1_bulletproof_generators_create(const secp256k1_context* ctx, const secp256k1_generator *blinding_gen, size_t n)
+      attach_function :secp256k1_bulletproof_generators_create, [:pointer, :pointer, :size_t], :pointer
+      # int secp256k1_bulletproof_rangeproof_prove(
+      #     const secp256k1_context* ctx,
+      #     secp256k1_scratch_space* scratch,
+      #     const secp256k1_bulletproof_generators* gens,
+      #     unsigned char* proof,
+      #     size_t* plen,
+      #     unsigned char* tau_x,
+      #     secp256k1_pubkey* t_one,
+      #     secp256k1_pubkey* t_two,
+      #     const uint64_t* value,
+      #     const uint64_t* min_value,
+      #     const unsigned char* const* blind,
+      #     const secp256k1_pedersen_commitment* const* commits,
+      #     size_t n_commits,
+      #     const secp256k1_generator* value_gen,
+      #     size_t nbits,
+      #     const unsigned char* nonce,
+      #     const unsigned char* private_nonce,
+      #     const unsigned char* extra_commit,
+      #     size_t extra_commit_len,
+      #     const unsigned char* message)
+      attach_function :secp256k1_bulletproof_rangeproof_prove, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :size_t, :pointer, :size_t, :pointer, :pointer, :pointer, :size_t, :pointer], :int
+      # int secp256k1_bulletproof_rangeproof_verify(
+      #     const secp256k1_context* ctx,
+      #     secp256k1_scratch_space* scratch,
+      #     const secp256k1_bulletproof_generators *gens,
+      #     const unsigned char* proof,
+      #     size_t plen,
+      #     const uint64_t* min_value,
+      #     const secp256k1_pedersen_commitment* commit,
+      #     size_t n_commits,
+      #     size_t nbits,
+      #     const secp256k1_generator* value_gen,
+      #     const unsigned char* extra_commit,
+      #     size_t extra_commit_len)
+      attach_function :secp256k1_bulletproof_rangeproof_verify, [:pointer, :pointer, :pointer, :pointer, :size_t, :pointer, :pointer, :size_t, :size_t, :pointer, :pointer, :size_t], :int
+    rescue FFI::NotFoundError
+    end
   end
 end

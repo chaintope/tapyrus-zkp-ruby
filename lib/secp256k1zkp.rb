@@ -11,6 +11,7 @@ require 'secp256k1zkp/ecdh'
 require 'secp256k1zkp/agg_sig'
 require 'secp256k1zkp/generator'
 require 'secp256k1zkp/pedersen'
+require 'secp256k1zkp/bulletproof'
 
 # Nimbleness's secp256k1-zkp binding.
 # https://github.com/mimblewimble/secp256k1-zkp
