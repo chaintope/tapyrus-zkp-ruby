@@ -1,4 +1,4 @@
-# Secp256k1zkp
+# Tapyrus ZKP
 
 WIP
 
@@ -7,7 +7,7 @@ WIP
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'secp256k1-zkp'
+gem 'tapyrus-zkp'
 ```
 
 And then execute:
@@ -16,11 +16,11 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install secp256k1-zkp
+    $ gem install tapyrus-zkp
 
-### Build secp256k1-zkp
+### Build tapyrus secp256k1
 
-`secp256k1-zkp` requires MW's [secp256k1-zkp](https://github.com/mimblewimble/secp256k1-zkp).
+`tapyrus-zkp` requires Tapyrus's [secp256k1](https://github.com/chaintope/secp256k1).
 
     $ git submodule update --init --recursive
     $ cd depends/secp256k1-zkp
