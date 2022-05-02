@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   # ECDH module
   # Note: This module can only be used if the libsecp256k1-zkp ecdh module is enabled.
@@ -20,10 +20,10 @@ module Secp256k1zkp
     module_function
 
     # Gene a new shared secret from a public key and private key
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @param [Secp256k1zkp::PublicKey] public_key public key.
-    # @param [Secp256k1zkp::PrivateKey] private_key private key.
-    # @return [Secp256k1zkp::SharedSecret]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::PublicKey] public_key public key.
+    # @param [TapyrusZkp::PrivateKey] private_key private key.
+    # @return [TapyrusZkp::SharedSecret]
     def generate(ctx, public_key, private_key)
       secret = SharedSecret.new
       res = C.secp256k1_ecdh(ctx.ctx, secret.pointer, public_key.pointer, private_key.pointer)

@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-RSpec.describe Secp256k1zkp::AggSig do
+RSpec.describe TapyrusZkp::AggSig do
 
-  let(:ctx) { Secp256k1zkp::Context.new }
+  let(:ctx) { TapyrusZkp::Context.new }
 
   describe 'AggSig multisig' do
     it do
       key_nums = 5
-      private_keys = key_nums.times.map { Secp256k1zkp::PrivateKey.generate(ctx) }
+      private_keys = key_nums.times.map { TapyrusZkp::PrivateKey.generate(ctx) }
 
       public_keys = private_keys.map { |k| k.public_key(ctx) }
       # Creating aggsig context with public keys
-      agg_ctx = Secp256k1zkp::AggSig::Context.new(ctx, public_keys)
+      agg_ctx = TapyrusZkp::AggSig::Context.new(ctx, public_keys)
       # Generating nonces for each index
       key_nums.times do |i|
         agg_ctx.generate_nonce(i)
@@ -31,26 +31,26 @@ RSpec.describe Secp256k1zkp::AggSig do
 
   describe 'Aggsig single' do
     it do
-      private_key = Secp256k1zkp::PrivateKey.generate(ctx)
+      private_key = TapyrusZkp::PrivateKey.generate(ctx)
       public_key = private_key.public_key(ctx)
       msg = SecureRandom.bytes(32)
 
       # Signature verification single (correct)
-      sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key)
-      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
+      sig = TapyrusZkp::AggSig.sign_single(ctx, msg, private_key)
+      result = TapyrusZkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
       expect(result).to be true
 
       # Signature verification single (wrong message)
       msg = SecureRandom.bytes(32)
-      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
+      result = TapyrusZkp::AggSig.valid_single?(ctx, sig, msg, public_key, false)
       expect(result).to be false
 
       # test optional extra key
       msg = SecureRandom.bytes(32)
-      private_key_extra = Secp256k1zkp::PrivateKey.generate(ctx)
+      private_key_extra = TapyrusZkp::PrivateKey.generate(ctx)
       public_key_extra = private_key_extra.public_key(ctx)
-      sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key, extra: private_key_extra)
-      result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, extra_pubkey: public_key_extra)
+      sig = TapyrusZkp::AggSig.sign_single(ctx, msg, private_key, extra: private_key_extra)
+      result = TapyrusZkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, extra_pubkey: public_key_extra)
       expect(result).to be true
     end
   end
@@ -58,11 +58,11 @@ RSpec.describe Secp256k1zkp::AggSig do
   describe 'Aggsig exchange' do
     it do
       20.times do
-        sender_private, sender_pub = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
-        receiver_private, receiver_pub = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+        sender_private, sender_pub = TapyrusZkp::PrivateKey.generate_keypair(ctx)
+        receiver_private, receiver_pub = TapyrusZkp::PrivateKey.generate_keypair(ctx)
 
-        sender_secnonce = Secp256k1zkp::AggSig.export_secnonce_single(ctx)
-        receiver_secnonce = Secp256k1zkp::AggSig.export_secnonce_single(ctx)
+        sender_secnonce = TapyrusZkp::AggSig.export_secnonce_single(ctx)
+        receiver_secnonce = TapyrusZkp::AggSig.export_secnonce_single(ctx)
 
         # Get total nonce
         nonce_sum = receiver_secnonce.public_key(ctx).dup
@@ -75,29 +75,29 @@ RSpec.describe Secp256k1zkp::AggSig do
         pubkey_sum.tweak_add!(ctx, sender_private.to_i)
 
         # Sender sign
-        sender_sig = Secp256k1zkp::AggSig.sign_single(
+        sender_sig = TapyrusZkp::AggSig.sign_single(
           ctx, msg, sender_private, secnonce: sender_secnonce,
           pubnonce: nonce_sum, publick_key_for_e: pubkey_sum, final_nonce_sum: nonce_sum
         )
         # Receiver verifies sender's signature
-        result = Secp256k1zkp::AggSig.valid_single?(ctx, sender_sig, msg, sender_pub, true,
-                                                    pubnonce: nonce_sum, pubkey_total: pubkey_sum)
+        result = TapyrusZkp::AggSig.valid_single?(ctx, sender_sig, msg, sender_pub, true,
+                                                  pubnonce: nonce_sum, pubkey_total: pubkey_sum)
         expect(result).to be true
 
         # Receiver sign
-        receiver_sig = Secp256k1zkp::AggSig.sign_single(
+        receiver_sig = TapyrusZkp::AggSig.sign_single(
           ctx, msg, receiver_private, secnonce: receiver_secnonce,
           pubnonce: nonce_sum, publick_key_for_e: pubkey_sum, final_nonce_sum: nonce_sum
         )
         # Sender verifies receiver's signature
-        result = Secp256k1zkp::AggSig.valid_single?(ctx, receiver_sig, msg, receiver_pub, true,
-                                                    pubnonce: nonce_sum, pubkey_total: pubkey_sum)
+        result = TapyrusZkp::AggSig.valid_single?(ctx, receiver_sig, msg, receiver_pub, true,
+                                                  pubnonce: nonce_sum, pubkey_total: pubkey_sum)
         expect(result).to be true
 
         # calculates final sig
-        final_sig = Secp256k1zkp::AggSig.add_signatures_single(ctx, [sender_sig, receiver_sig], nonce_sum)
+        final_sig = TapyrusZkp::AggSig.add_signatures_single(ctx, [sender_sig, receiver_sig], nonce_sum)
         # verify final sig
-        result = Secp256k1zkp::AggSig.valid_single?(ctx, final_sig, msg, pubkey_sum, false, pubkey_total: pubkey_sum)
+        result = TapyrusZkp::AggSig.valid_single?(ctx, final_sig, msg, pubkey_sum, false, pubkey_total: pubkey_sum)
         expect(result).to be true
       end
     end
@@ -110,10 +110,10 @@ RSpec.describe Secp256k1zkp::AggSig do
       public_keys = []
 
       100.times do
-        private_key, public_key = Secp256k1zkp::PrivateKey.generate_keypair(ctx)
+        private_key, public_key = TapyrusZkp::PrivateKey.generate_keypair(ctx)
         msg = SecureRandom.bytes(32)
-        sig = Secp256k1zkp::AggSig.sign_single(ctx, msg, private_key, publick_key_for_e: public_key)
-        result = Secp256k1zkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, pubkey_total: public_key)
+        sig = TapyrusZkp::AggSig.sign_single(ctx, msg, private_key, publick_key_for_e: public_key)
+        result = TapyrusZkp::AggSig.valid_single?(ctx, sig, msg, public_key, false, pubkey_total: public_key)
         expect(result).to be true
         public_keys << public_key
         sigs << sig
@@ -121,7 +121,7 @@ RSpec.describe Secp256k1zkp::AggSig do
       end
 
       # verify aggsig batch
-      result = Secp256k1zkp::AggSig.verify_batch(ctx, sigs, msgs, public_keys)
+      result = TapyrusZkp::AggSig.verify_batch(ctx, sigs, msgs, public_keys)
       expect(result).to be true
     end
   end

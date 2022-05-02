@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   module ECDSA
 
@@ -13,10 +13,10 @@ module Secp256k1zkp
       layout :data, [:uchar, 64]
 
       # Convert a DER-encoded bytes to Signature.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [String] der DER-encoded signature with binary format.
       # @raise [Secp256k1zkp::InvalidSignature]
-      # @return [Secp256k1zkp::ECDSA::Signature]
+      # @return [TapyrusZkp::ECDSA::Signature]
       def self.from_der(ctx, der)
         signature = Signature.new
         data_ptr = FFI::MemoryPointer.new(:uchar, der.bytesize).put_bytes(0, der)
@@ -27,10 +27,10 @@ module Secp256k1zkp
       end
 
       # Convert a compact bytes to Signature.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [String] compact signature with binary format.
       # @raise [Secp256k1zkp::InvalidSignature]
-      # @return [Secp256k1zkp::ECDSA::Signature]
+      # @return [TapyrusZkp::ECDSA::Signature]
       def self.from_compact(ctx, compact)
         raise InvalidSignature unless compact.bytesize == SIZE_COMPACT
 
@@ -43,7 +43,7 @@ module Secp256k1zkp
       end
 
       # Convert signature to DER-encoded signature.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @raise [Secp256k1zkp::AssertError]
       # @return [String] DER-encoded signature
       def to_der(ctx)
@@ -56,7 +56,7 @@ module Secp256k1zkp
       end
 
       # Convert signature to compact format.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @raise [Secp256k1zkp::AssertError]
       # @return [String] Compact signature
       def to_compact(ctx)
@@ -68,13 +68,13 @@ module Secp256k1zkp
       end
 
       # Normalizes a signature to a "low S" form.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       def normalize_s!(ctx)
         C.secp256k1_ecdsa_signature_normalize(ctx.ctx, pointer, pointer)
       end
 
       # Override +==+ to check whether same signature or not.
-      # @param [Secp256k1zkp::ECDSA::Signature] other
+      # @param [TapyrusZkp::ECDSA::Signature] other
       # @return [Boolean]
       def ==(other)
         return false unless other.is_a?(Signature)
@@ -89,15 +89,15 @@ module Secp256k1zkp
       layout :data, [:uchar, 65]
 
       # Convert a compact-encoded byte slice to a signature.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [String] compact signature with binary format.
       # @param [Integer] rec_id recovery id.
-      # @return [Secp256k1zkp::ECDSA::RecoverableSignature]
+      # @return [TapyrusZkp::ECDSA::RecoverableSignature]
       def self.from_compact(ctx, compact, rec_id)
         raise InvalidSignature unless compact.bytesize == Signature::SIZE_COMPACT
 
         data_ptr = FFI::MemoryPointer.new(:uchar, compact.bytesize).put_bytes(0, compact)
-        signature = Secp256k1zkp::ECDSA::RecoverableSignature.new
+        signature = TapyrusZkp::ECDSA::RecoverableSignature.new
         res = C.secp256k1_ecdsa_recoverable_signature_parse_compact(ctx.ctx, signature.pointer, data_ptr, rec_id)
         raise InvalidSignature unless res == 1
 
@@ -105,7 +105,7 @@ module Secp256k1zkp
       end
 
       # Convert the recoverable signature in compact format
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @return [Array(rec_id, compact)]
       # @raise [Secp256k1zkp::AssertError]
       def to_compact(ctx)
@@ -118,8 +118,8 @@ module Secp256k1zkp
       end
 
       # Convert recoverable signature to normal signature.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @return [Secp256k1zkp::ECDSA::Signature]
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+      # @return [TapyrusZkp::ECDSA::Signature]
       # @raise [Secp256k1zkp::AssertError]
       def to_standard(ctx)
         standard = Signature.new
@@ -130,13 +130,13 @@ module Secp256k1zkp
       end
 
       # Determines the public key for which `sig` is a valid signature for +msg+.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [String] msg message with binary format.
-      # @return [Secp256k1zkp::PublicKey]
+      # @return [TapyrusZkp::PublicKey]
       # @raise [Secp256k1zkp::InvalidSignature]
       def recover(ctx, msg)
         msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
-        public_key = Secp256k1zkp::PublicKey.new
+        public_key = TapyrusZkp::PublicKey.new
         res = C.secp256k1_ecdsa_recover(ctx.ctx, public_key.pointer, pointer, msg_ptr)
         raise InvalidSignature unless res == 1
 
@@ -144,7 +144,7 @@ module Secp256k1zkp
       end
 
       # Override +==+ to check whether same signature or not.
-      # @param [Secp256k1zkp::ECDSA::Signature] other
+      # @param [TapyrusZkp::ECDSA::Signature] other
       # @return [Boolean]
       def ==(other)
         return false unless other.is_a?(RecoverableSignature)

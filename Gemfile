@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in secp256k1zkp.gemspec
+# Specify your gem's dependencies in tapyrus_zkp.gemspec
 gemspec
 
 gem "rake", "~> 13.0"

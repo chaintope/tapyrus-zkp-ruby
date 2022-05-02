@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   # All flags' lower 8 bits indicate what they're for. Do not use directly.
   SECP256K1_FLAGS_TYPE_MASK = ((1 << 8) - 1)

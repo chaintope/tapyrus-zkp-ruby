@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   module Pedersen
 
@@ -13,15 +13,15 @@ module Secp256k1zkp
       SIZE_INTERNAL = 64 # The size of a Pedersen commitment
 
       # Generate a Pedersen commitment.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [Integer] value value to commit to.
       # @param [Integer] blind blinding factor.
-      # @param [Secp256k1zkp::Generator] value_gen value generator 'h'
-      # @param [Secp256k1zkp::Generator] blind_gen blinding factor generator 'g'
-      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @param [TapyrusZkp::Generator] value_gen value generator 'h'
+      # @param [TapyrusZkp::Generator] blind_gen blinding factor generator 'g'
+      # @return [TapyrusZkp::Pedersen::Commitment]
       # @raise [ArgumentError]
       # @raise [Secp256k1zkp::InvalidFactor]
-      def self.generate(ctx, value, blind, value_gen: Secp256k1zkp.generator_h_ptr, blind_gen: Secp256k1zkp.generator_g_ptr)
+      def self.generate(ctx, value, blind, value_gen: TapyrusZkp.generator_h_ptr, blind_gen: TapyrusZkp.generator_g_ptr)
         raise ArgumentError unless blind.is_a?(Integer)
         raise ArgumentError unless value.is_a?(Integer)
 
@@ -35,9 +35,9 @@ module Secp256k1zkp
       end
 
       # Parse a 33-bytes commitment into a commitment object.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [String] hex_commitment 33-bytes serialized commitment key.
-      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @return [TapyrusZkp::Pedersen::Commitment]
       # @raise [Secp256k1zkp::InvalidCommit]
       def self.from_hex(ctx, hex_commitment)
         raw_commit = [hex_commitment].pack('H*')
@@ -52,9 +52,9 @@ module Secp256k1zkp
       end
 
       # Convert commitment from public key.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @param [Secp256k1zkp::PublicKey] public_key public key
-      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::PublicKey] public_key public key
+      # @return [TapyrusZkp::Pedersen::Commitment]
       def self.from_public_key(ctx, public_key)
         commitment = Commitment.new
         res = C.secp256k1_pubkey_to_pedersen_commitment(ctx.ctx, commitment.pointer, public_key.pointer)
@@ -64,7 +64,7 @@ module Secp256k1zkp
       end
 
       # Computes the sum of multiple positive and negative blinding factors.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [Array(Integer)] positives array of positive blind factors
       # @param [Array(Integer)] negatives array of negative blind factors
       def self.blind_sum(ctx, positives, negatives)
@@ -87,10 +87,10 @@ module Secp256k1zkp
       end
 
       # Computes the sum of multiple positive and negative pedersen commitments
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] positives array of positive commitments
-      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] negatives array of negative commitments
-      # @return [Secp256k1zkp::Pedersen::Commitment]
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+      # @param [Array(TapyrusZkp::Pedersen::Commitment)] positives array of positive commitments
+      # @param [Array(TapyrusZkp::Pedersen::Commitment)] negatives array of negative commitments
+      # @return [TapyrusZkp::Pedersen::Commitment]
       # @raise [Secp256k1zkp::IncorrectCommitSum]
       def self.commit_sum(ctx, positives, negatives)
         positive_ptr = FFI::MemoryPointer.new(:pointer, positives.length)
@@ -109,9 +109,9 @@ module Secp256k1zkp
       end
 
       # Verify a tally of Pedersen commitments
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] positives array of positive commitments
-      # @param [Array(Secp256k1zkp::Pedersen::Commitment)] negatives array of negative commitments
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+      # @param [Array(TapyrusZkp::Pedersen::Commitment)] positives array of positive commitments
+      # @param [Array(TapyrusZkp::Pedersen::Commitment)] negatives array of negative commitments
       # @return [Boolean]
       def self.valid_commit_sum?(ctx, positives, negatives)
         positive_ptr = FFI::MemoryPointer.new(:pointer, positives.length)
@@ -125,7 +125,7 @@ module Secp256k1zkp
 
       # Compute a blinding factor using a switch commitment.
       # Calculates the blinding factor x' = x + SHA256(xG+vH | xJ), used in the switch commitment x'G+vH
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @param [Integer] value value to commit to.
       # @param [Integer] blind blinding factor.
       # @return [Integer] blind factor for switch commitment
@@ -139,9 +139,9 @@ module Secp256k1zkp
           switch,
           FFI::MemoryPointer.new(:uchar, 32).put_bytes(0, raw_blind),
           value,
-          Secp256k1zkp.generator_h_ptr,
-          Secp256k1zkp.generator_g_ptr,
-          Secp256k1zkp.generator_j_ptr
+          TapyrusZkp.generator_h_ptr,
+          TapyrusZkp.generator_g_ptr,
+          TapyrusZkp.generator_j_ptr
         )
         raise AssertError, 'secp256k1_blind_switch failed' unless res == 1
 
@@ -149,7 +149,7 @@ module Secp256k1zkp
       end
 
       # Convert commitment to a serialized hex string.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
       # @return [String] hex string.
       def to_hex(ctx)
         hex_ptr = FFI::MemoryPointer.new(:uchar, SIZE)
@@ -159,8 +159,8 @@ module Secp256k1zkp
       end
 
       # Convert commitment to public key.
-      # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-      # @return [Secp256k1zkp::PublicKey]
+      # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+      # @return [TapyrusZkp::PublicKey]
       # @raise [Secp256k1zkp::InvalidPublicKey]
       def to_public_key(ctx)
         public_key = PublicKey.new
@@ -171,7 +171,7 @@ module Secp256k1zkp
       end
 
       # Override +==+ to check whether same public key or not.
-      # @param [Secp256k1zkp::Pedersen::Commitment] other
+      # @param [TapyrusZkp::Pedersen::Commitment] other
       # @return [Boolean]
       def ==(other)
         return false unless other.is_a?(Commitment)

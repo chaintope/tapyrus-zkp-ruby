@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   class Generator < FFI::Struct
     layout :data, [:uchar, 64]

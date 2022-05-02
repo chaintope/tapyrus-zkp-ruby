@@ -13,7 +13,7 @@ extension = case host_os
 lib_path = File.expand_path("../depends/secp256k1-zkp/.libs/libsecp256k1#{extension}", __dir__)
 ENV['LIBSECP256K1-ZKP'] = lib_path
 
-require 'secp256k1zkp'
+require 'tapyrus_zkp'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -37,15 +37,15 @@ def hex!(hex)
 end
 
 def ctx_none
-  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_NONE)
+  TapyrusZkp::Context.new(caps: TapyrusZkp::SECP256K1_CONTEXT_NONE)
 end
 
 def ctx_verify
-  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_VERIFY)
+  TapyrusZkp::Context.new(caps: TapyrusZkp::SECP256K1_CONTEXT_VERIFY)
 end
 
 def ctx_sign
-  Secp256k1zkp::Context.new(caps: Secp256k1zkp::SECP256K1_CONTEXT_SIGN)
+  TapyrusZkp::Context.new(caps: TapyrusZkp::SECP256K1_CONTEXT_SIGN)
 end
 
 def generate_scalar

@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative 'lib/secp256k1zkp/version'
+require_relative 'lib/tapyrus_zkp/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'secp256k1-zkp'
-  spec.version       = Secp256k1zkp::VERSION
+  spec.name          = 'tapyrus-zkp'
+  spec.version       = TapyrusZkp::VERSION
   spec.authors       = ['azuchi']
   spec.email         = ['azuchi@chaintope.com']
 
-  spec.summary       = 'MV secp256k1zkp Ruby wrapper.'
-  spec.description   = 'MV secp256k1zkp Ruby wrapper.'
-  spec.homepage      = 'https://github.com/azuchi/ruby-secp256k1zkp'
+  spec.summary       = 'Tapyrus zkp ruby wrapper.'
+  spec.description   = 'Tapyrus zkp ruby wrapper.'
+  spec.homepage      = 'https://github.com/chaintope/tapyrus-zkp-ruby'
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.6.0'
 

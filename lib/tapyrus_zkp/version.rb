@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
   VERSION = "0.1.0"
 end

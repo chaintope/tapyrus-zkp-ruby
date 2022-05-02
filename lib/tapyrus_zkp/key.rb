@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-module Secp256k1zkp
+module TapyrusZkp
 
   # Secp256k1 public key
   class PublicKey < FFI::Struct
     layout :data, [:uchar, 64]
 
     # Generate public key from hex string.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] pubkey_hex Public key hex string.
-    # @return [Secp256k1zkp::PublicKey] Public key object.
+    # @return [TapyrusZkp::PublicKey] Public key object.
     # @raise [Secp256k1zkp::InvalidPublicKey]
     def self.from_hex(ctx, pubkey_hex)
       raw_pubkey = [pubkey_hex].pack('H*')
@@ -25,9 +25,9 @@ module Secp256k1zkp
     end
 
     # Generate public key from private key.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] private_key_hex Private key hex string.
-    # @return [Secp256k1zkp::PublicKey] Public key object.
+    # @return [TapyrusZkp::PublicKey] Public key object.
     # @raise [Secp256k1zkp::AssertError]
     def self.from_private_key(ctx, private_key_hex)
       raw_priv_key = [private_key_hex].pack('H*')
@@ -40,9 +40,9 @@ module Secp256k1zkp
     end
 
     # Add a number of public keys together.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @param [Array(Secp256k1zkp::PublicKey)] public_keys public keys to be added.
-    # @return [Secp256k1zkp::PublicKey]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @param [Array(TapyrusZkp::PublicKey)] public_keys public keys to be added.
+    # @return [TapyrusZkp::PublicKey]
     # @raise [InvalidPublicKey]
     def self.from_combination(ctx, *public_keys)
       public_key = PublicKey.new
@@ -57,7 +57,7 @@ module Secp256k1zkp
     end
 
     # Generate public key hex string.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [Boolean] compressed whether compressed public key or not.
     # @return [String] Public key hex string.
     # @raise [Secp256k1zkp::AssertError]
@@ -73,12 +73,12 @@ module Secp256k1zkp
     end
 
     # Verify signature.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] msg signed message with binary format.
-    # @param [Secp256k1zkp::ECDSA::Signature] sig signature.
+    # @param [TapyrusZkp::ECDSA::Signature] sig signature.
     # @return [Boolean]
     def valid_sig?(ctx, msg, sig)
-      raise ArgumentError, 'sig must be Secp256k1zkp::ECDSA::Signature instance' unless sig.is_a?(Secp256k1zkp::ECDSA::Signature)
+      raise ArgumentError, 'sig must be Secp256k1zkp::ECDSA::Signature instance' unless sig.is_a?(TapyrusZkp::ECDSA::Signature)
 
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
       res = C.secp256k1_ecdsa_verify(ctx.ctx, sig.pointer, msg_ptr, pointer)
@@ -86,15 +86,15 @@ module Secp256k1zkp
     end
 
     # Generate shared secret from +private_key+ and self.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @param [Secp256k1zkp::PrivateKey] private_key
-    # @return [Secp256k1zkp::ECDH::SharedSecret]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::PrivateKey] private_key
+    # @return [TapyrusZkp::ECDH::SharedSecret]
     def ecdh(ctx, private_key)
       ECDH.generate(ctx, self, private_key)
     end
 
     # Tweak a public key by adding tweak times the generator to it. (P + tG)
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar
     # @raise [ArgumentError]
     # @raise [IncapableContext]
@@ -108,7 +108,7 @@ module Secp256k1zkp
     end
 
     # Tweak a public key by multiplying it by a +scalar+ value. (tP)
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
     # @raise [ArgumentError]
     # @raise [Secp256k1zkp::IncapableContext]
@@ -122,14 +122,14 @@ module Secp256k1zkp
     end
 
     # Negates a public key in place.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     def negate!(ctx)
       res = C.secp256k1_ec_pubkey_negate(ctx.ctx, pointer)
       raise AssertError, 'secp256k1_ec_pubkey_negate failed' unless res == 1
     end
 
     # Override +==+ to check whether same public key or not.
-    # @param [Secp256k1zkp::PublicKey] other
+    # @param [TapyrusZkp::PublicKey] other
     # @return [Boolean]
     def ==(other)
       return false unless other.is_a?(PublicKey)
@@ -145,9 +145,9 @@ module Secp256k1zkp
 
     attr_reader :key
 
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] key private key with binary format.
-    # @return [Secp256k1zkp::PrivateKey]
+    # @return [TapyrusZkp::PrivateKey]
     # @raise [Secp256k1zkp::InvalidPrivateKey]
     def initialize(ctx, key)
       raise InvalidPrivateKey, 'Invalid private key size' unless key.bytesize == BYTE_SIZE
@@ -160,8 +160,8 @@ module Secp256k1zkp
     end
 
     # Generate private key.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @return [Secp256k1zkp::PrivateKey]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @return [TapyrusZkp::PrivateKey]
     def self.generate(ctx)
       from_hex(ctx, SecureRandom.hex(BYTE_SIZE))
     rescue InvalidPrivateKey
@@ -169,17 +169,17 @@ module Secp256k1zkp
     end
 
     # Generate key pair.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @return [Array(Secp256k1zkp::PrivateKey, Secp256k1zkp::PublicKey)]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @return [Array(Secp256k1zkp::PrivateKey, TapyrusZkp::PublicKey)]
     def self.generate_keypair(ctx)
       private_key = generate(ctx)
       [private_key, private_key.public_key(ctx)]
     end
 
     # Initialize private key from hex data.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] key private key with hex format.
-    # @return [Secp256k1zkp::PrivateKey]
+    # @return [TapyrusZkp::PrivateKey]
     # @raise [Secp256k1zkp::InvalidPrivateKey]
     def self.from_hex(ctx, privkey_hex)
       raw_priv = [privkey_hex].pack('H*')
@@ -189,8 +189,8 @@ module Secp256k1zkp
     end
 
     # Calculate public key
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @return [Secp256k1zkp::PublicKey]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @return [TapyrusZkp::PublicKey]
     # @raise [Secp256k1zkp::AssertError]
     # @raise [Secp256k1zkp::IncapableContext]
     def public_key(ctx)
@@ -204,13 +204,13 @@ module Secp256k1zkp
     end
 
     # Generate signature.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] msg message with binary format to be signed.
-    # @return [Secp256k1zkp::ECDSA::Signature]
+    # @return [TapyrusZkp::ECDSA::Signature]
     # @raise [Secp256k1zkp::AssertError]
     def sign(ctx, msg)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
-      signature = Secp256k1zkp::ECDSA::Signature.new
+      signature = TapyrusZkp::ECDSA::Signature.new
       res = C.secp256k1_ecdsa_sign(ctx.ctx, signature.pointer, msg_ptr, pointer, nil, nil)
       raise AssertError, 'secp256k1_ecdsa_sign failed' unless res == 1
 
@@ -219,13 +219,13 @@ module Secp256k1zkp
 
     # Generate recoverable signature.
     # Note: This method can only be used if the libsecp256k1-zkp recovery module is enabled.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [String] msg message with binary format to be signed.
-    # @return [Secp256k1zkp::ECDSA::RecoverableSignature]
+    # @return [TapyrusZkp::ECDSA::RecoverableSignature]
     # @raise [Secp256k1zkp::AssertError]
     def sign_recoverable(ctx, msg)
       msg_ptr = FFI::MemoryPointer.new(:uchar, msg.bytesize).put_bytes(0, msg)
-      signature = Secp256k1zkp::ECDSA::RecoverableSignature.new
+      signature = TapyrusZkp::ECDSA::RecoverableSignature.new
       res = C.secp256k1_ecdsa_sign_recoverable(ctx.ctx, signature.pointer, msg_ptr, pointer, nil, nil)
       raise AssertError, 'secp256k1_ecdsa_sign_recoverable failed' unless res == 1
 
@@ -233,9 +233,9 @@ module Secp256k1zkp
     end
 
     # Generate shared secret from +public_key+ and self.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
-    # @param [Secp256k1zkp::PublicKey] public_key
-    # @return [Secp256k1zkp::ECDH::SharedSecret]
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::PublicKey] public_key
+    # @return [TapyrusZkp::ECDH::SharedSecret]
     def ecdh(ctx, public_key)
       ECDH.generate(ctx, public_key, self)
     end
@@ -245,7 +245,7 @@ module Secp256k1zkp
     end
 
     # Override +==+ to check whether same private key or not.
-    # @param [Secp256k1zkp::PublicKey] other
+    # @param [TapyrusZkp::PublicKey] other
     # @return [Boolean]
     def ==(other)
       return false unless other.is_a?(PrivateKey)
@@ -266,7 +266,7 @@ module Secp256k1zkp
     end
 
     # Tweak a private key by adding tweak to it.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
     # @raise [ArgumentError]
     # @raise [AssertError]
@@ -281,7 +281,7 @@ module Secp256k1zkp
     end
 
     # Tweak a private key by multiplying it by a +scalar+.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     # @param [Integer] scalar tweak value.
     # @raise [ArgumentError]
     # @raise [Secp256k1zkp::IncapableContext]
@@ -296,7 +296,7 @@ module Secp256k1zkp
     end
 
     # Negates a private key in place.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     def negate!(ctx)
       process_with_update do |pointer|
         res = C.secp256k1_ec_privkey_tweak_neg(ctx.ctx, pointer)
@@ -305,7 +305,7 @@ module Secp256k1zkp
     end
 
     # Tweak a private key by inverting it.
-    # @param [Secp256k1zkp::Context] ctx Secp256k1 context.
+    # @param [TapyrusZkp::Context] ctx Secp256k1 context.
     def inv!(ctx)
       process_with_update do |pointer|
         res = C.secp256k1_ec_privkey_tweak_inv(ctx.ctx, pointer)

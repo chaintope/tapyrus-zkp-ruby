@@ -2,20 +2,19 @@
 
 require 'ffi'
 require 'securerandom'
-require 'secp256k1zkp/version'
-require 'secp256k1zkp/c'
-require 'secp256k1zkp/context'
-require 'secp256k1zkp/key'
-require 'secp256k1zkp/ecdsa'
-require 'secp256k1zkp/ecdh'
-require 'secp256k1zkp/agg_sig'
-require 'secp256k1zkp/generator'
-require 'secp256k1zkp/pedersen'
-require 'secp256k1zkp/bulletproof'
+require 'tapyrus_zkp/version'
+require 'tapyrus_zkp/c'
+require 'tapyrus_zkp/context'
+require 'tapyrus_zkp/key'
+require 'tapyrus_zkp/ecdsa'
+require 'tapyrus_zkp/ecdh'
+require 'tapyrus_zkp/agg_sig'
+require 'tapyrus_zkp/generator'
+require 'tapyrus_zkp/pedersen'
 
-# Nimbleness's secp256k1-zkp binding.
-# https://github.com/mimblewimble/secp256k1-zkp
-module Secp256k1zkp
+# Tapyrus secp256k1-zkp binding.
+# https://github.com/chaintope/secp256k1
+module TapyrusZkp
 
   class Error < StandardError; end
   class AssertError < Error; end
